@@ -1,0 +1,2272 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Afro Digital Market — Documents Digitaux Premium</title>
+  <meta name="description" content="La marketplace africaine de référence pour les documents digitaux premium : ebooks, guides PDF, formations numériques." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+
+  <!-- Firebase v10 CDN -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, query, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // FIREBASE CONFIGURATION
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    const firebaseConfig = {
+      apiKey: "AIzaSyBRmZlGmKkmXEyk22flRYc5xdQV-MBuOYg",
+      authDomain: "afro-digital-market.firebaseapp.com",
+      projectId: "afro-digital-market",
+      storageBucket: "afro-digital-market.firebasestorage.app",
+      messagingSenderId: "1068049707626",
+      appId: "1:1068049707626:web:f08db8a0b1f9a3f5a6d013",
+      measurementId: "G-XBG2KJD3VJ"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // REALTIME PRODUCTS LISTENER
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    function initProductsListener() {
+      const productsGrid = document.getElementById("products-grid");
+      const productsLoader = document.getElementById("products-loader");
+      const productsEmpty = document.getElementById("products-empty");
+
+      const q = query(collection(db, "products"), orderBy("createdAt", "desc"), limit(12));
+
+      onSnapshot(q, (snapshot) => {
+        productsLoader.style.display = "none";
+
+        if (snapshot.empty) {
+          productsEmpty.style.display = "flex";
+          productsGrid.innerHTML = "";
+          return;
+        }
+
+        productsEmpty.style.display = "none";
+        productsGrid.innerHTML = "";
+
+        snapshot.forEach((doc) => {
+          const product = { id: doc.id, ...doc.data() };
+          const card = createProductCard(product);
+          productsGrid.appendChild(card);
+        });
+
+        // Re-trigger scroll animations for new cards
+        observeElements();
+      }, (error) => {
+        console.error("Firestore error:", error);
+        productsLoader.innerHTML = `<div class="error-msg">Erreur de chargement. Vérifiez votre connexion.</div>`;
+      });
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // PRODUCT CARD BUILDER
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    function createProductCard(product) {
+      const card = document.createElement("div");
+      card.className = "product-card reveal";
+
+      const rating = parseFloat(product.rating) || 4.5;
+      const stars = generateStars(rating);
+      const isPremium = product.premium !== false;
+      const price = product.price || "0";
+      const image = product.image || "https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=400&q=80";
+
+      card.innerHTML = `
+        <div class="card-image-wrap">
+          <img src="${escapeHtml(image)}" alt="${escapeHtml(product.title || '')}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=400&q=80'" />
+          ${isPremium ? '<span class="badge-premium">✦ Premium</span>' : ''}
+          <span class="badge-cat">${escapeHtml(product.category || 'Digital')}</span>
+          <div class="card-overlay"></div>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">${escapeHtml(product.title || 'Document sans titre')}</h3>
+          <p class="card-desc">${escapeHtml(product.description || '')}</p>
+          <div class="card-meta">
+            <div class="card-rating">${stars}<span>${rating.toFixed(1)}</span></div>
+            <div class="card-price">${escapeHtml(String(price))} FCFA</div>
+          </div>
+          <div class="card-actions">
+            <button class="btn-buy" onclick="handleBuy('${escapeHtml(product.id)}', '${escapeHtml(product.title || '')}', '${escapeHtml(String(price))}')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+              Acheter
+            </button>
+            <button class="btn-preview" onclick="handlePreview('${escapeHtml(product.id)}')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              Aperçu
+            </button>
+          </div>
+        </div>
+      `;
+
+      return card;
+    }
+
+    function generateStars(rating) {
+      let stars = "";
+      for (let i = 1; i <= 5; i++) {
+        if (i <= Math.floor(rating)) stars += '<svg class="star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+        else if (i - 0.5 <= rating) stars += '<svg class="star half" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+        else stars += '<svg class="star" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+      }
+      return stars;
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement("div");
+      div.appendChild(document.createTextNode(String(str)));
+      return div.innerHTML;
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // INIT ON DOM READY
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    document.addEventListener("DOMContentLoaded", () => {
+      initProductsListener();
+    });
+  </script>
+
+  <style>
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       CSS CUSTOM PROPERTIES
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    :root {
+      --bg-void: #04040a;
+      --bg-deep: #080815;
+      --bg-card: rgba(14, 14, 28, 0.85);
+      --bg-glass: rgba(255, 255, 255, 0.04);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(123, 97, 255, 0.3);
+
+      --c-white: #f0efff;
+      --c-muted: rgba(200, 195, 255, 0.55);
+      --c-accent: #7b61ff;
+      --c-accent2: #00d4ff;
+      --c-gold: #ffd166;
+      --c-danger: #ff4d6d;
+
+      --grad-hero: linear-gradient(135deg, #7b61ff 0%, #00d4ff 100%);
+      --grad-card: linear-gradient(145deg, rgba(123,97,255,0.12), rgba(0,212,255,0.05));
+      --grad-btn: linear-gradient(135deg, #7b61ff, #4f3bcc);
+      --grad-text: linear-gradient(90deg, #7b61ff, #00d4ff, #7b61ff);
+
+      --font-display: 'Syne', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+
+      --radius-sm: 10px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --radius-xl: 36px;
+
+      --shadow-glow: 0 0 40px rgba(123, 97, 255, 0.25);
+      --shadow-card: 0 8px 40px rgba(0,0,0,0.6);
+      --transition: 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       RESET & BASE
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; font-size: 16px; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-void);
+      color: var(--c-white);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    img { max-width: 100%; display: block; }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: var(--font-body); cursor: pointer; border: none; }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       NOISE TEXTURE OVERLAY
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.4;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       SCROLLBAR
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-deep); }
+    ::-webkit-scrollbar-thumb { background: var(--c-accent); border-radius: 99px; }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       UTILITY CLASSES
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    .section { padding: 120px 0; }
+    .section-sm { padding: 80px 0; }
+
+    .gradient-text {
+      background: var(--grad-text);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradientShift 4s linear infinite;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% center; }
+      100% { background-position: 200% center; }
+    }
+
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--c-accent);
+      background: rgba(123, 97, 255, 0.12);
+      border: 1px solid rgba(123, 97, 255, 0.25);
+      padding: 6px 16px;
+      border-radius: 99px;
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+
+    .section-sub {
+      font-size: 1.125rem;
+      color: var(--c-muted);
+      max-width: 520px;
+      line-height: 1.7;
+    }
+
+    .glow-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--c-accent);
+      box-shadow: 0 0 12px var(--c-accent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(0.8); }
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       SCROLL REVEAL ANIMATIONS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       FLOATING ANIMATION
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      33% { transform: translateY(-18px) rotate(2deg); }
+      66% { transform: translateY(-8px) rotate(-1deg); }
+    }
+
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-25px); }
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       NAVBAR
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      padding: 20px 0;
+      transition: var(--transition);
+    }
+
+    .navbar.scrolled {
+      background: rgba(4, 4, 10, 0.85);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 0;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.4);
+    }
+
+    .navbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 32px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.25rem;
+      white-space: nowrap;
+    }
+
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: var(--grad-hero);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      box-shadow: 0 0 20px rgba(123, 97, 255, 0.5);
+    }
+
+    .logo-text span { color: var(--c-accent2); }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--c-muted);
+      transition: color 0.25s;
+      position: relative;
+    }
+
+    .nav-links a::after {
+      content: "";
+      position: absolute;
+      bottom: -4px; left: 0;
+      width: 0; height: 2px;
+      background: var(--grad-hero);
+      border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+
+    .nav-links a:hover { color: var(--c-white); }
+    .nav-links a:hover::after { width: 100%; }
+
+    .nav-cta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--c-white);
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+    .btn-ghost:hover {
+      border-color: var(--c-accent);
+      color: var(--c-accent);
+    }
+
+    .btn-primary {
+      background: var(--grad-btn);
+      color: #fff;
+      padding: 10px 22px;
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: var(--transition);
+      box-shadow: 0 0 24px rgba(123, 97, 255, 0.4);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 32px rgba(123, 97, 255, 0.6);
+    }
+
+    /* Mobile menu */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 8px;
+      background: transparent;
+      border: none;
+    }
+    .hamburger span {
+      display: block;
+      width: 24px; height: 2px;
+      background: var(--c-white);
+      border-radius: 2px;
+      transition: var(--transition);
+    }
+    .hamburger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.active span:nth-child(2) { opacity: 0; }
+    .hamburger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 4, 10, 0.97);
+      backdrop-filter: blur(24px);
+      z-index: 999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      opacity: 0;
+      transform: scale(0.95);
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    .mobile-menu.open {
+      display: flex;
+      opacity: 1;
+      transform: scale(1);
+    }
+    .mobile-menu a {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--c-white);
+      transition: color 0.25s;
+    }
+    .mobile-menu a:hover { color: var(--c-accent); }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       HERO SECTION
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      padding-top: 100px;
+    }
+
+    /* Animated orb backgrounds */
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      animation: floatSlow 8s ease-in-out infinite;
+    }
+    .orb-1 {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(123,97,255,0.25) 0%, transparent 70%);
+      top: -100px; left: -150px;
+      animation-delay: 0s;
+    }
+    .orb-2 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(0,212,255,0.18) 0%, transparent 70%);
+      bottom: -50px; right: -100px;
+      animation-delay: -3s;
+    }
+    .orb-3 {
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(255,209,102,0.1) 0%, transparent 70%);
+      top: 40%; left: 50%;
+      animation-delay: -5s;
+    }
+
+    /* Grid pattern */
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(123,97,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(123,97,255,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse at center, black 20%, transparent 80%);
+    }
+
+    .hero-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(123, 97, 255, 0.1);
+      border: 1px solid rgba(123, 97, 255, 0.3);
+      padding: 8px 18px;
+      border-radius: 99px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--c-accent);
+      margin-bottom: 28px;
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 800;
+      line-height: 1.05;
+      margin-bottom: 24px;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-sub {
+      font-size: 1.15rem;
+      color: var(--c-muted);
+      max-width: 480px;
+      line-height: 1.75;
+      margin-bottom: 40px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 56px;
+    }
+
+    .btn-hero-primary {
+      background: var(--grad-hero);
+      color: #fff;
+      padding: 16px 32px;
+      border-radius: var(--radius-md);
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 700;
+      transition: var(--transition);
+      box-shadow: 0 0 40px rgba(123,97,255,0.5);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-hero-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 48px rgba(123,97,255,0.7);
+    }
+
+    .btn-hero-ghost {
+      background: var(--bg-glass);
+      border: 1px solid var(--border);
+      color: var(--c-white);
+      padding: 16px 32px;
+      border-radius: var(--radius-md);
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 600;
+      transition: var(--transition);
+      backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-hero-ghost:hover {
+      border-color: var(--c-accent);
+      background: rgba(123, 97, 255, 0.1);
+      transform: translateY(-2px);
+    }
+
+    /* Stats */
+    .hero-stats {
+      display: flex;
+      gap: 40px;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .stat-num {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--c-white);
+    }
+    .stat-num span { color: var(--c-accent); }
+    .stat-label { font-size: 0.8rem; color: var(--c-muted); font-weight: 500; letter-spacing: 0.05em; }
+
+    /* Hero visual */
+    .hero-visual {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-mockup {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 28px;
+      backdrop-filter: blur(20px);
+      box-shadow: var(--shadow-card), 0 0 80px rgba(123,97,255,0.15);
+      animation: float 7s ease-in-out infinite;
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .mockup-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .mockup-dots { display: flex; gap: 6px; }
+    .mockup-dots span {
+      width: 10px; height: 10px; border-radius: 50%;
+    }
+    .mockup-dots span:nth-child(1) { background: #ff5f56; }
+    .mockup-dots span:nth-child(2) { background: #febc2e; }
+    .mockup-dots span:nth-child(3) { background: #28c840; }
+    .mockup-title {
+      font-size: 0.8rem;
+      color: var(--c-muted);
+      flex: 1;
+      text-align: center;
+      font-family: var(--font-body);
+    }
+
+    .mockup-product {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      padding: 14px;
+      background: var(--bg-glass);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      margin-bottom: 12px;
+      transition: var(--transition);
+    }
+    .mockup-product:hover { border-color: var(--border-glow); }
+
+    .mockup-img {
+      width: 60px; height: 70px;
+      border-radius: var(--radius-sm);
+      object-fit: cover;
+      flex-shrink: 0;
+      background: linear-gradient(135deg, var(--c-accent), var(--c-accent2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+    }
+
+    .mockup-info { flex: 1; }
+    .mockup-name {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+      font-family: var(--font-display);
+    }
+    .mockup-price {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--c-accent);
+      font-family: var(--font-display);
+    }
+    .mockup-cat {
+      font-size: 0.72rem;
+      color: var(--c-muted);
+      margin-bottom: 8px;
+    }
+
+    /* Floating elements around mockup */
+    .float-badge {
+      position: absolute;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      backdrop-filter: blur(20px);
+      font-size: 0.8rem;
+      white-space: nowrap;
+      box-shadow: var(--shadow-card);
+    }
+
+    .float-badge-1 {
+      top: -20px; right: -20px;
+      animation: float 5s ease-in-out infinite;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .float-badge-2 {
+      bottom: 20px; left: -40px;
+      animation: float 6s ease-in-out infinite 1.5s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge-icon { font-size: 20px; }
+    .badge-text { display: flex; flex-direction: column; }
+    .badge-text strong { font-weight: 700; font-family: var(--font-display); }
+    .badge-text small { color: var(--c-muted); font-size: 0.7rem; }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       CATEGORIES SECTION
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .categories-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-top: 56px;
+    }
+
+    .category-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+    }
+
+    .category-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: var(--grad-card);
+      opacity: 0;
+      transition: opacity 0.35s;
+    }
+
+    .category-card:hover {
+      border-color: var(--border-glow);
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-glow);
+    }
+    .category-card:hover::before { opacity: 1; }
+
+    .cat-icon {
+      font-size: 2.5rem;
+      margin-bottom: 16px;
+      display: block;
+      transition: transform 0.35s;
+    }
+    .category-card:hover .cat-icon { transform: scale(1.2) rotate(-5deg); }
+
+    .cat-name {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .cat-count {
+      font-size: 0.8rem;
+      color: var(--c-muted);
+    }
+
+    .cat-arrow {
+      position: absolute;
+      top: 20px; right: 20px;
+      width: 32px; height: 32px;
+      background: var(--bg-glass);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      opacity: 0;
+      transition: var(--transition);
+    }
+    .category-card:hover .cat-arrow { opacity: 1; transform: rotate(-45deg); }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       PRODUCTS SECTION
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .products-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 56px;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+
+    .live-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--c-muted);
+      background: var(--bg-glass);
+      border: 1px solid var(--border);
+      padding: 8px 16px;
+      border-radius: 99px;
+    }
+
+    #products-loader {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      padding: 80px 0;
+    }
+
+    .spinner {
+      width: 48px; height: 48px;
+      border: 3px solid var(--border);
+      border-top-color: var(--c-accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #products-empty {
+      display: none;
+      grid-column: 1 / -1;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      padding: 80px 0;
+      color: var(--c-muted);
+      text-align: center;
+    }
+    .empty-icon { font-size: 4rem; opacity: 0.4; }
+
+    #products-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    /* Product Card */
+    .product-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: var(--transition);
+      backdrop-filter: blur(12px);
+      position: relative;
+    }
+
+    .product-card:hover {
+      border-color: var(--border-glow);
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-card), 0 0 60px rgba(123,97,255,0.2);
+    }
+
+    .card-image-wrap {
+      position: relative;
+      height: 200px;
+      overflow: hidden;
+    }
+    .card-image-wrap img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s ease;
+    }
+    .product-card:hover .card-image-wrap img { transform: scale(1.08); }
+
+    .card-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(4,4,10,0.8) 0%, transparent 60%);
+    }
+
+    .badge-premium {
+      position: absolute;
+      top: 14px; right: 14px;
+      background: linear-gradient(135deg, #ffd166, #f79d65);
+      color: #0a0a0a;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 99px;
+      letter-spacing: 0.05em;
+      z-index: 1;
+    }
+
+    .badge-cat {
+      position: absolute;
+      bottom: 14px; left: 14px;
+      background: rgba(4,4,10,0.8);
+      border: 1px solid var(--border);
+      font-size: 0.72rem;
+      padding: 4px 12px;
+      border-radius: 99px;
+      color: var(--c-muted);
+      z-index: 1;
+      backdrop-filter: blur(8px);
+    }
+
+    .card-body { padding: 20px; }
+
+    .card-title {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      line-height: 1.3;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-desc {
+      font-size: 0.85rem;
+      color: var(--c-muted);
+      margin-bottom: 16px;
+      line-height: 1.6;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .card-rating {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.8rem;
+      color: var(--c-muted);
+    }
+
+    .star {
+      width: 12px; height: 12px;
+      fill: rgba(255,255,255,0.15);
+      stroke: none;
+    }
+    .star.filled, .star.half { fill: var(--c-gold); }
+
+    .card-price {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--c-accent);
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-buy {
+      flex: 1;
+      background: var(--grad-btn);
+      color: #fff;
+      padding: 11px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: var(--transition);
+      box-shadow: 0 0 20px rgba(123,97,255,0.35);
+    }
+    .btn-buy:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 24px rgba(123,97,255,0.55);
+    }
+
+    .btn-preview {
+      background: var(--bg-glass);
+      border: 1px solid var(--border);
+      color: var(--c-muted);
+      padding: 11px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: var(--transition);
+    }
+    .btn-preview:hover {
+      border-color: var(--c-accent);
+      color: var(--c-accent);
+    }
+
+    .error-msg {
+      color: var(--c-danger);
+      font-size: 0.9rem;
+      text-align: center;
+      padding: 20px;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       HOW IT WORKS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 60px;
+      position: relative;
+    }
+
+    .steps-grid::before {
+      content: "";
+      position: absolute;
+      top: 60px; left: calc(16.67% + 24px);
+      right: calc(16.67% + 24px);
+      height: 2px;
+      background: linear-gradient(90deg, var(--c-accent), var(--c-accent2));
+      opacity: 0.3;
+    }
+
+    .step-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 36px 28px;
+      text-align: center;
+      position: relative;
+      transition: var(--transition);
+    }
+
+    .step-card:hover {
+      border-color: var(--border-glow);
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .step-number {
+      position: absolute;
+      top: -14px; left: 50%;
+      transform: translateX(-50%);
+      background: var(--grad-hero);
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 800;
+      font-family: var(--font-display);
+    }
+
+    .step-icon-wrap {
+      width: 72px; height: 72px;
+      background: rgba(123, 97, 255, 0.12);
+      border: 1px solid rgba(123, 97, 255, 0.2);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      font-size: 2rem;
+      transition: var(--transition);
+    }
+    .step-card:hover .step-icon-wrap {
+      background: rgba(123,97,255,0.25);
+      box-shadow: 0 0 30px rgba(123,97,255,0.3);
+    }
+
+    .step-title {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .step-desc { font-size: 0.9rem; color: var(--c-muted); line-height: 1.65; }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       ADVANTAGES
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .advantages-section {
+      background: linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-void) 100%);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .advantages-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 60px;
+    }
+
+    .adv-card {
+      background: var(--bg-glass);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .adv-card::after {
+      content: "";
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--grad-hero);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s ease;
+    }
+    .adv-card:hover::after { transform: scaleX(1); }
+    .adv-card:hover {
+      border-color: var(--border-glow);
+      transform: translateY(-4px);
+    }
+
+    .adv-icon {
+      font-size: 2rem;
+      margin-bottom: 18px;
+      display: block;
+    }
+    .adv-title {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .adv-desc { font-size: 0.875rem; color: var(--c-muted); line-height: 1.65; }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       TESTIMONIALS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .testimonials-wrap {
+      position: relative;
+      margin-top: 60px;
+      overflow: hidden;
+    }
+
+    .testimonials-slider {
+      display: flex;
+      gap: 24px;
+      transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .testimonial-card {
+      min-width: calc(33.333% - 16px);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      flex-shrink: 0;
+    }
+
+    .testi-stars {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 18px;
+    }
+    .testi-stars svg {
+      width: 16px; height: 16px;
+      fill: var(--c-gold);
+    }
+
+    .testi-text {
+      font-size: 0.925rem;
+      color: var(--c-muted);
+      line-height: 1.75;
+      margin-bottom: 20px;
+      font-style: italic;
+    }
+
+    .testi-author {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .testi-avatar {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: var(--grad-hero);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .testi-name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+    .testi-role { font-size: 0.8rem; color: var(--c-muted); }
+
+    .slider-controls {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 32px;
+    }
+
+    .slider-btn {
+      width: 44px; height: 44px;
+      background: var(--bg-glass);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--c-white);
+      font-size: 18px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .slider-btn:hover {
+      border-color: var(--c-accent);
+      background: rgba(123,97,255,0.15);
+    }
+
+    .slider-dots {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .slider-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .slider-dot.active {
+      background: var(--c-accent);
+      transform: scale(1.3);
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       CTA FINAL
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .cta-section {
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-bg {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, rgba(123,97,255,0.15) 0%, transparent 70%);
+    }
+
+    .cta-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glow);
+      border-radius: var(--radius-xl);
+      padding: 80px 60px;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(20px);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .cta-card::before {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      border-radius: var(--radius-xl);
+      background: var(--grad-hero);
+      z-index: -1;
+      opacity: 0.15;
+    }
+
+    .cta-title {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      margin-bottom: 20px;
+      line-height: 1.1;
+    }
+
+    .cta-sub {
+      font-size: 1.1rem;
+      color: var(--c-muted);
+      max-width: 520px;
+      margin: 0 auto 40px;
+    }
+
+    .cta-actions {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       FOOTER
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    footer {
+      background: var(--bg-deep);
+      border-top: 1px solid var(--border);
+      padding: 80px 0 40px;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1.5fr;
+      gap: 60px;
+      margin-bottom: 60px;
+    }
+
+    .footer-brand p {
+      font-size: 0.875rem;
+      color: var(--c-muted);
+      line-height: 1.7;
+      margin: 16px 0 24px;
+      max-width: 260px;
+    }
+
+    .social-links {
+      display: flex;
+      gap: 10px;
+    }
+    .social-link {
+      width: 40px; height: 40px;
+      background: var(--bg-glass);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      transition: var(--transition);
+      text-decoration: none;
+    }
+    .social-link:hover {
+      border-color: var(--c-accent);
+      background: rgba(123,97,255,0.15);
+      transform: translateY(-3px);
+    }
+
+    .footer-col h4 {
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: var(--c-white);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .footer-col ul { list-style: none; }
+    .footer-col li { margin-bottom: 12px; }
+    .footer-col a {
+      font-size: 0.875rem;
+      color: var(--c-muted);
+      transition: color 0.25s;
+    }
+    .footer-col a:hover { color: var(--c-white); }
+
+    .newsletter-form {
+      display: flex;
+      gap: 0;
+      margin-top: 8px;
+    }
+    .newsletter-form input {
+      flex: 1;
+      background: var(--bg-glass);
+      border: 1px solid var(--border);
+      border-right: none;
+      border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+      padding: 12px 16px;
+      color: var(--c-white);
+      font-size: 0.875rem;
+      font-family: var(--font-body);
+      outline: none;
+      transition: border-color 0.25s;
+    }
+    .newsletter-form input::placeholder { color: var(--c-muted); }
+    .newsletter-form input:focus { border-color: var(--c-accent); }
+    .newsletter-form button {
+      background: var(--grad-btn);
+      color: #fff;
+      padding: 12px 18px;
+      border: none;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: var(--transition);
+    }
+    .newsletter-form button:hover { filter: brightness(1.15); }
+
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .footer-bottom p { font-size: 0.8rem; color: var(--c-muted); }
+
+    .footer-bottom-links {
+      display: flex;
+      gap: 24px;
+    }
+    .footer-bottom-links a {
+      font-size: 0.8rem;
+      color: var(--c-muted);
+      transition: color 0.25s;
+    }
+    .footer-bottom-links a:hover { color: var(--c-white); }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       TOAST NOTIFICATION
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .toast {
+      position: fixed;
+      bottom: 32px; right: 32px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-glow);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: var(--shadow-card), var(--shadow-glow);
+      backdrop-filter: blur(20px);
+      z-index: 9998;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: transform 0.4s ease, opacity 0.4s ease;
+      max-width: 340px;
+    }
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    .toast-icon { font-size: 24px; flex-shrink: 0; }
+    .toast-text strong { display: block; font-family: var(--font-display); font-weight: 700; margin-bottom: 2px; }
+    .toast-text span { font-size: 0.8rem; color: var(--c-muted); }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       RESPONSIVE
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    @media (max-width: 1024px) {
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+      .hero-inner { grid-template-columns: 1fr; text-align: center; gap: 60px; }
+      .hero-actions { justify-content: center; }
+      .hero-stats { justify-content: center; }
+      .hero-sub { margin: 0 auto 40px; }
+      .hero-visual { order: -1; }
+      .categories-grid { grid-template-columns: repeat(2, 1fr); }
+      #products-grid { grid-template-columns: repeat(2, 1fr); }
+      .steps-grid { grid-template-columns: 1fr; }
+      .steps-grid::before { display: none; }
+      .advantages-grid { grid-template-columns: repeat(2, 1fr); }
+      .testimonial-card { min-width: calc(50% - 12px); }
+      .footer-grid { grid-template-columns: 1fr 1fr; gap: 40px; }
+    }
+
+    @media (max-width: 640px) {
+      .section { padding: 80px 0; }
+      .hero { padding-top: 80px; }
+      .categories-grid { grid-template-columns: repeat(2, 1fr); }
+      #products-grid { grid-template-columns: 1fr; }
+      .advantages-grid { grid-template-columns: 1fr; }
+      .testimonial-card { min-width: 100%; }
+      .cta-card { padding: 48px 28px; }
+      .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+      .hero-stats { flex-direction: column; gap: 20px; }
+      .float-badge { display: none; }
+      .hero-mockup { max-width: 320px; }
+      .navbar-inner .btn-ghost { display: none; }
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     TOAST NOTIFICATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<div class="toast" id="toast">
+  <span class="toast-icon" id="toast-icon">✅</span>
+  <div class="toast-text">
+    <strong id="toast-title">Succès</strong>
+    <span id="toast-msg">Action effectuée</span>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     MOBILE MENU
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<nav class="mobile-menu" id="mobileMenu">
+  <a href="#accueil" onclick="closeMobileMenu()">Accueil</a>
+  <a href="shop.html" onclick="closeMobileMenu()">Boutique</a>
+  <a href="#categories" onclick="closeMobileMenu()">Catégories</a>
+  <a href="#contact" onclick="closeMobileMenu()">Contact</a>
+  <button class="btn-primary" onclick="closeMobileMenu(); showToast('👋', 'Bienvenue!', 'Créez votre compte gratuitement')">Commencer</button>
+</nav>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     NAVBAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<header class="navbar" id="navbar">
+  <div class="container">
+    <nav class="navbar-inner">
+      <a href="#accueil" class="logo">
+        <div class="logo-icon">🌍</div>
+        <span class="logo-text">Afro <span>Digital</span> Market</span>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#accueil">Accueil</a></li>
+        <li><a href="shop.html">Boutique</a></li>
+        <li><a href="#categories">Catégories</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+
+      <div class="nav-cta">
+        <button class="btn-ghost" onclick="showToast('🔐', 'Connexion', 'Fonctionnalité bientôt disponible')">Connexion</button>
+        <button class="btn-primary" onclick="showToast('🚀', 'Inscription', 'Créez votre compte maintenant!')">Commencer</button>
+        <button class="hamburger" id="hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     HERO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<section class="hero" id="accueil">
+  <div class="hero-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="hero-grid"></div>
+  </div>
+
+  <div class="container">
+    <div class="hero-inner">
+      <!-- Text Content -->
+      <div class="hero-content">
+        <div class="hero-badge reveal">
+          <div class="glow-dot"></div>
+          ✦ La marketplace #1 d'Afrique
+        </div>
+
+        <h1 class="hero-title reveal reveal-delay-1">
+          Le marché africain des<br/>
+          <span class="gradient-text">documents digitaux</span><br/>
+          premium.
+        </h1>
+
+        <p class="hero-sub reveal reveal-delay-2">
+          Accédez à des milliers d'ebooks, guides PDF, formations numériques et ressources premium créés par des experts africains et internationaux.
+        </p>
+
+        <div class="hero-actions reveal reveal-delay-3">
+          <button class="btn-hero-primary" onclick="document.getElementById('boutique').scrollIntoView({behavior:'smooth'})">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            Explorer les documents
+          </button>
+          <button class="btn-hero-ghost" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+            Comment ça marche
+          </button>
+        </div>
+
+        <div class="hero-stats reveal reveal-delay-4">
+          <div class="stat-item">
+            <div class="stat-num">2.4<span>K+</span></div>
+            <div class="stat-label">Documents</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">18<span>K+</span></div>
+            <div class="stat-label">Clients satisfaits</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">4.9<span>★</span></div>
+            <div class="stat-label">Note moyenne</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visual Mockup -->
+      <div class="hero-visual">
+        <div class="hero-mockup">
+          <div class="mockup-header">
+            <div class="mockup-dots">
+              <span></span><span></span><span></span>
+            </div>
+            <span class="mockup-title">afrodigitalmarket.com</span>
+          </div>
+
+          <div class="mockup-product">
+            <div class="mockup-img">📊</div>
+            <div class="mockup-info">
+              <div class="mockup-name">Guide Business Plan Africain</div>
+              <div class="mockup-cat">Business • Premium</div>
+              <div class="mockup-price">4 500 FCFA</div>
+            </div>
+          </div>
+          <div class="mockup-product">
+            <div class="mockup-img">🤖</div>
+            <div class="mockup-info">
+              <div class="mockup-name">Maîtrisez l'IA en 30 jours</div>
+              <div class="mockup-cat">Intelligence Artificielle</div>
+              <div class="mockup-price">6 900 FCFA</div>
+            </div>
+          </div>
+          <div class="mockup-product">
+            <div class="mockup-img">🎨</div>
+            <div class="mockup-info">
+              <div class="mockup-name">Design UI/UX Moderne 2025</div>
+              <div class="mockup-cat">Design • Nouveau</div>
+              <div class="mockup-price">3 200 FCFA</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="float-badge float-badge-1">
+          <div class="badge-icon">🔥</div>
+          <div class="badge-text">
+            <strong>+127 ventes</strong>
+            <small>Cette semaine</small>
+          </div>
+        </div>
+
+        <div class="float-badge float-badge-2">
+          <div class="badge-icon">⚡</div>
+          <div class="badge-text">
+            <strong>Téléchargement</strong>
+            <small>Instantané</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     CATEGORIES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<section class="section" id="categories">
+  <div class="container">
+    <div style="text-align:center">
+      <span class="section-label"><div class="glow-dot"></div> Collections</span>
+      <h2 class="section-title reveal">Explorez par <span class="gradient-text">catégorie</span></h2>
+      <p class="section-sub reveal" style="margin:0 auto">Des ressources premium dans tous les domaines qui comptent pour votre évolution professionnelle.</p>
+    </div>
+
+    <div class="categories-grid">
+      <div class="category-card reveal" onclick="filterCategory('Business')">
+        <div class="cat-arrow">→</div>
+        <span class="cat-icon">💼</span>
+        <div class="cat-name">Business</div>
+        <div class="cat-count">Plans, stratégies, finance</div>
+      </div>
+      <div class="category-card reveal reveal-delay-1" onclick="filterCategory('Technologie')">
+        <div class="cat-arrow">→</div>
+        <span class="cat-icon">💻</span>
+        <div class="cat-name">Technologie</div>
+        <div class="cat-count">Code, systèmes, data</div>
+      </div>
+      <div class="category-card reveal reveal-delay-2" onclick="filterCategory('IA')">
+        <div class="cat-arrow">→</div>
+        <span class="cat-icon">🤖</span>
+        <div class="cat-name">Intelligence Artificielle</div>
+        <div class="cat-count">Prompts, LLMs, automatisation</div>
+      </div>
+      <div class="category-card reveal reveal-delay-3" onclick="filterCategory('Marketing')">
+        <div class="cat-arrow">→</div>
+        <span class="cat-icon">📣</span>
+        <div class="cat-name">Marketing</div>
+        <div class="cat-count">Digital, growth, social</div>
+      </div>
+      <div class="category-card reveal" onclick="filterCategory('Dev Web')">
+        <div class="cat-arrow">→</div>
+        <span class="cat-icon">🌐</span>
+        <div class="cat-name">Développement Web</div>
+        <div class="cat-count">Frontend, backend, fullstack</div>
+      </div>
+      <div class="category-card reveal reveal-delay-1" onclick="filterCategory('Design')">
+        <div class="cat-arrow">→</div>
+        <span class="cat-icon">🎨</span>
+        <div class="cat-name">Design</div>
+        <div class="cat-count">UI/UX, Figma, Canva</div>
+      </div>
+      <div class="category-card reveal reveal-delay-2" onclick="filterCategory('Architecture')">
+        <div class="cat-arrow">→</div>
+        <span class="cat-icon">🏗️</span>
+        <div class="cat-name">Architecture</div>
+        <div class="cat-count">Plans, techniques, décoration</div>
+      </div>
+      <div class="category-card reveal reveal-delay-3" onclick="filterCategory('Éducation')">
+        <div class="cat-arrow">→</div>
+        <span class="cat-icon">📚</span>
+        <div class="cat-name">Éducation</div>
+        <div class="cat-count">Formations, cours, certifs</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     PRODUCTS SECTION (FIREBASE)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<section class="section" id="boutique" style="background: var(--bg-deep);">
+  <div class="container">
+    <div class="products-header">
+      <div>
+        <span class="section-label"><div class="glow-dot"></div> Boutique</span>
+        <h2 class="section-title reveal">Produits <span class="gradient-text">récents</span></h2>
+        <p class="section-sub reveal">Mis à jour en temps réel depuis notre catalogue Firebase.</p>
+      </div>
+      <div class="live-indicator">
+        <div class="glow-dot"></div>
+        Mise à jour en direct
+      </div>
+    </div>
+
+    <div id="products-grid">
+      <div id="products-loader">
+        <div class="spinner"></div>
+        <p style="color: var(--c-muted); font-size: 0.9rem;">Chargement des produits…</p>
+      </div>
+    </div>
+
+    <div id="products-empty">
+      <div class="empty-icon">📭</div>
+      <h3 style="font-family: var(--font-display); font-size: 1.3rem;">Aucun produit pour l'instant</h3>
+      <p style="color: var(--c-muted); font-size: 0.9rem;">Revenez bientôt — de nouveaux documents arrivent chaque semaine.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     HOW IT WORKS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<section class="section" id="how">
+  <div class="container">
+    <div style="text-align:center">
+      <span class="section-label"><div class="glow-dot"></div> Processus</span>
+      <h2 class="section-title reveal">Comment ça <span class="gradient-text">marche</span> ?</h2>
+      <p class="section-sub reveal" style="margin:0 auto">3 étapes simples pour accéder à vos documents en moins de 2 minutes.</p>
+    </div>
+
+    <div class="steps-grid">
+      <div class="step-card reveal">
+        <div class="step-number">1</div>
+        <div class="step-icon-wrap">📄</div>
+        <h3 class="step-title">Choisissez un document</h3>
+        <p class="step-desc">Parcourez notre catalogue de ressources premium et sélectionnez le document qui correspond à vos besoins.</p>
+      </div>
+      <div class="step-card reveal reveal-delay-2">
+        <div class="step-number">2</div>
+        <div class="step-icon-wrap">💳</div>
+        <h3 class="step-title">Payez via FedaPay</h3>
+        <p class="step-desc">Effectuez votre paiement 100% sécurisé via FedaPay — Mobile Money, carte bancaire ou virement acceptés.</p>
+      </div>
+      <div class="step-card reveal reveal-delay-4">
+        <div class="step-number">3</div>
+        <div class="step-icon-wrap">⬇️</div>
+        <h3 class="step-title">Téléchargez instantanément</h3>
+        <p class="step-desc">Recevez immédiatement votre lien de téléchargement sécurisé. Accès à vie garanti.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     ADVANTAGES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<section class="section advantages-section">
+  <div class="container">
+    <div style="text-align:center">
+      <span class="section-label"><div class="glow-dot"></div> Pourquoi nous</span>
+      <h2 class="section-title reveal">Des avantages <span class="gradient-text">exclusifs</span></h2>
+    </div>
+
+    <div class="advantages-grid">
+      <div class="adv-card reveal">
+        <span class="adv-icon">⚡</span>
+        <h3 class="adv-title">Téléchargement instantané</h3>
+        <p class="adv-desc">Accédez immédiatement à vos documents après paiement. Aucune attente, aucune validation manuelle.</p>
+      </div>
+      <div class="adv-card reveal reveal-delay-1">
+        <span class="adv-icon">🔐</span>
+        <h3 class="adv-title">Paiement 100% sécurisé</h3>
+        <p class="adv-desc">Transactions chiffrées et protégées via FedaPay. Votre argent et vos données sont en sécurité.</p>
+      </div>
+      <div class="adv-card reveal reveal-delay-2">
+        <span class="adv-icon">✦</span>
+        <h3 class="adv-title">Documents premium</h3>
+        <p class="adv-desc">Chaque ressource est sélectionnée et validée par notre équipe d'experts avant publication.</p>
+      </div>
+      <div class="adv-card reveal reveal-delay-1">
+        <span class="adv-icon">♾️</span>
+        <h3 class="adv-title">Accès à vie</h3>
+        <p class="adv-desc">Un achat, un accès permanent. Téléchargez vos fichiers autant de fois que vous voulez.</p>
+      </div>
+      <div class="adv-card reveal reveal-delay-2">
+        <span class="adv-icon">🔄</span>
+        <h3 class="adv-title">Mises à jour gratuites</h3>
+        <p class="adv-desc">Les documents évoluent avec l'actualité. Vous bénéficiez de toutes les mises à jour sans frais.</p>
+      </div>
+      <div class="adv-card reveal reveal-delay-3">
+        <span class="adv-icon">💬</span>
+        <h3 class="adv-title">Support réactif</h3>
+        <p class="adv-desc">Une question ? Notre équipe répond sous 2h via WhatsApp, email ou chat en direct.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     TESTIMONIALS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<section class="section" style="overflow:hidden">
+  <div class="container">
+    <div style="text-align:center">
+      <span class="section-label"><div class="glow-dot"></div> Témoignages</span>
+      <h2 class="section-title reveal">Ce que disent nos <span class="gradient-text">clients</span></h2>
+    </div>
+
+    <div class="testimonials-wrap">
+      <div class="testimonials-slider" id="testiSlider">
+        <div class="testimonial-card">
+          <div class="testi-stars">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <p class="testi-text">"J'ai acheté le guide Business Plan africain et c'est exactement ce dont j'avais besoin pour lancer ma startup. Contenu ultra complet et livraison immédiate. Je recommande à 100% !"</p>
+          <div class="testi-author">
+            <div class="testi-avatar">AK</div>
+            <div>
+              <div class="testi-name">Ama Kofi</div>
+              <div class="testi-role">Entrepreneuse • Accra, Ghana</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card">
+          <div class="testi-stars">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <p class="testi-text">"La plateforme est super intuitive et les documents sont vraiment de qualité. Le support WhatsApp m'a répondu en moins d'une heure. Excellent service, je reviendrai certainement !"</p>
+          <div class="testi-author">
+            <div class="testi-avatar" style="background: linear-gradient(135deg, #00d4ff, #0099cc);">MB</div>
+            <div>
+              <div class="testi-name">Moussa Bamba</div>
+              <div class="testi-role">Développeur web • Abidjan, Côte d'Ivoire</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card">
+          <div class="testi-stars">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <p class="testi-text">"Incroyable ! Le guide marketing digital africain m'a permis de tripler les ventes de ma boutique en ligne en 3 mois. Contenu actionnable, pas du tout théorique. Merci ADM !"</p>
+          <div class="testi-author">
+            <div class="testi-avatar" style="background: linear-gradient(135deg, #ffd166, #f79d65);">FN</div>
+            <div>
+              <div class="testi-name">Fatou Ndiaye</div>
+              <div class="testi-role">E-commerçante • Dakar, Sénégal</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card">
+          <div class="testi-stars">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <p class="testi-text">"Les formations IA disponibles sur Afro Digital Market sont clairement les meilleures que j'ai trouvées en français. Le prix est accessible et la qualité est au rendez-vous."</p>
+          <div class="testi-author">
+            <div class="testi-avatar" style="background: linear-gradient(135deg, #ff4d6d, #c9184a);">KO</div>
+            <div>
+              <div class="testi-name">Kwame Osei</div>
+              <div class="testi-role">Data Scientist • Nairobi, Kenya</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slider-controls">
+      <button class="slider-btn" id="prevBtn" onclick="moveSlider(-1)">←</button>
+      <div class="slider-dots" id="sliderDots"></div>
+      <button class="slider-btn" id="nextBtn" onclick="moveSlider(1)">→</button>
+    </div>
+  </div>
+</section>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     CTA FINAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<section class="section cta-section" id="contact">
+  <div class="cta-bg"></div>
+  <div class="container" style="position:relative; z-index:1">
+    <div class="cta-card reveal">
+      <span class="section-label" style="margin-bottom:24px"><div class="glow-dot"></div> Rejoignez-nous</span>
+      <h2 class="cta-title">Prêt à accélérer votre<br/><span class="gradient-text">croissance digitale</span> ?</h2>
+      <p class="cta-sub">Rejoignez plus de 18 000 professionnels africains qui utilisent Afro Digital Market pour se former et progresser.</p>
+      <div class="cta-actions">
+        <button class="btn-hero-primary" onclick="showToast('🎉', 'Bienvenue!', 'Parcourez notre catalogue de ressources premium')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          Commencer maintenant
+        </button>
+        <button class="btn-hero-ghost" onclick="document.getElementById('boutique').scrollIntoView({behavior:'smooth'})">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+          Voir la boutique
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     FOOTER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <!-- Brand -->
+      <div class="footer-brand">
+        <a href="#" class="logo">
+          <div class="logo-icon">🌍</div>
+          <span class="logo-text">Afro <span>Digital</span> Market</span>
+        </a>
+        <p>La marketplace africaine de référence pour les documents digitaux premium. Ebooks, guides PDF, formations numériques pour votre succès.</p>
+        <div class="social-links">
+          <a href="#" class="social-link" title="Twitter">𝕏</a>
+          <a href="#" class="social-link" title="Instagram">📸</a>
+          <a href="#" class="social-link" title="Facebook">f</a>
+          <a href="#" class="social-link" title="WhatsApp">💬</a>
+          <a href="#" class="social-link" title="YouTube">▶</a>
+        </div>
+      </div>
+
+      <!-- Liens rapides -->
+      <div class="footer-col">
+        <h4>Liens rapides</h4>
+        <ul>
+          <li><a href="#accueil">Accueil</a></li>
+          <li><a href="#boutique">Boutique</a></li>
+          <li><a href="#categories">Catégories</a></li>
+          <li><a href="#how">Comment ça marche</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </div>
+
+      <!-- Catégories -->
+      <div class="footer-col">
+        <h4>Catégories</h4>
+        <ul>
+          <li><a href="#">Business</a></li>
+          <li><a href="#">Technologie</a></li>
+          <li><a href="#">Intelligence Artificielle</a></li>
+          <li><a href="#">Marketing</a></li>
+          <li><a href="#">Design</a></li>
+          <li><a href="#">Éducation</a></li>
+        </ul>
+      </div>
+
+      <!-- Newsletter -->
+      <div class="footer-col">
+        <h4>Newsletter</h4>
+        <p style="font-size:0.875rem; color:var(--c-muted); margin-bottom:16px; line-height:1.6">Recevez chaque semaine les nouvelles ressources premium directement dans votre boîte mail.</p>
+        <form class="newsletter-form" onsubmit="handleNewsletter(event)">
+          <input type="email" placeholder="votre@email.com" required />
+          <button type="submit">→</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© 2025 Afro Digital Market. Tous droits réservés.</p>
+      <div class="footer-bottom-links">
+        <a href="#">Mentions légales</a>
+        <a href="#">Politique de confidentialité</a>
+        <a href="#">CGV</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     JAVASCRIPT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<script>
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // NAVBAR SCROLL EFFECT
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const navbar = document.getElementById("navbar");
+  window.addEventListener("scroll", () => {
+    navbar.classList.toggle("scrolled", window.scrollY > 50);
+  }, { passive: true });
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // MOBILE MENU
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const hamburger = document.getElementById("hamburger");
+  const mobileMenu = document.getElementById("mobileMenu");
+
+  function toggleMobileMenu() {
+    const isOpen = mobileMenu.classList.contains("open");
+    if (isOpen) {
+      closeMobileMenu();
+    } else {
+      mobileMenu.style.display = "flex";
+      requestAnimationFrame(() => mobileMenu.classList.add("open"));
+      hamburger.classList.add("active");
+      document.body.style.overflow = "hidden";
+    }
+  }
+
+  function closeMobileMenu() {
+    mobileMenu.classList.remove("open");
+    hamburger.classList.remove("active");
+    document.body.style.overflow = "";
+    setTimeout(() => { mobileMenu.style.display = ""; }, 300);
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // SCROLL REVEAL (IntersectionObserver)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function observeElements() {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: "0px 0px -40px 0px" });
+
+    document.querySelectorAll(".reveal:not(.visible)").forEach(el => observer.observe(el));
+  }
+
+  document.addEventListener("DOMContentLoaded", observeElements);
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // TESTIMONIALS SLIDER
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  let currentSlide = 0;
+  const slider = document.getElementById("testiSlider");
+  const dotsContainer = document.getElementById("sliderDots");
+  const totalSlides = 4;
+  let slidesPerView = 3;
+  let autoplayInterval;
+
+  function initSlider() {
+    slidesPerView = window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 2 : 3;
+    const maxSlides = totalSlides - slidesPerView;
+
+    // Create dots
+    dotsContainer.innerHTML = "";
+    for (let i = 0; i <= maxSlides; i++) {
+      const dot = document.createElement("button");
+      dot.className = "slider-dot" + (i === 0 ? " active" : "");
+      dot.onclick = () => goToSlide(i);
+      dotsContainer.appendChild(dot);
+    }
+
+    updateSlider();
+    startAutoplay();
+  }
+
+  function updateSlider() {
+    const cardWidth = slider.children[0].offsetWidth + 24;
+    slider.style.transform = `translateX(-${currentSlide * cardWidth}px)`;
+    const dots = dotsContainer.querySelectorAll(".slider-dot");
+    dots.forEach((d, i) => d.classList.toggle("active", i === currentSlide));
+  }
+
+  function moveSlider(dir) {
+    const maxSlides = totalSlides - slidesPerView;
+    currentSlide = Math.max(0, Math.min(currentSlide + dir, maxSlides));
+    updateSlider();
+    resetAutoplay();
+  }
+
+  function goToSlide(i) {
+    currentSlide = i;
+    updateSlider();
+    resetAutoplay();
+  }
+
+  function startAutoplay() {
+    autoplayInterval = setInterval(() => {
+      const maxSlides = totalSlides - slidesPerView;
+      currentSlide = currentSlide >= maxSlides ? 0 : currentSlide + 1;
+      updateSlider();
+    }, 4500);
+  }
+
+  function resetAutoplay() {
+    clearInterval(autoplayInterval);
+    startAutoplay();
+  }
+
+  document.addEventListener("DOMContentLoaded", initSlider);
+  window.addEventListener("resize", initSlider, { passive: true });
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // TOAST NOTIFICATION
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  let toastTimeout;
+  function showToast(icon, title, msg) {
+    const toast = document.getElementById("toast");
+    document.getElementById("toast-icon").textContent = icon;
+    document.getElementById("toast-title").textContent = title;
+    document.getElementById("toast-msg").textContent = msg;
+    toast.classList.add("show");
+    clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => toast.classList.remove("show"), 3500);
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // BUY / PREVIEW HANDLERS
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function handleBuy(id, title, price) {
+    showToast("🛒", "Redirection paiement", `${title} — ${price} FCFA`);
+    // TODO: Integrate FedaPay payment gateway
+  }
+
+  function handlePreview(id) {
+    showToast("👁️", "Aperçu", "Aperçu bientôt disponible pour ce document");
+    // TODO: Open preview modal
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // CATEGORY FILTER
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function filterCategory(name) {
+    showToast("🔍", "Filtrage", `Catégorie : ${name}`);
+    document.getElementById("boutique").scrollIntoView({ behavior: "smooth" });
+    // Firebase filtering can be added here with additional query
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // NEWSLETTER
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function handleNewsletter(e) {
+    e.preventDefault();
+    const email = e.target.querySelector("input").value;
+    showToast("📧", "Inscription réussie!", `${email} ajouté à notre newsletter`);
+    e.target.reset();
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // ANIMATING STATS (counter effect)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function animateValue(el, start, end, duration, suffix) {
+    const range = end - start;
+    const startTime = performance.now();
+    function update(currentTime) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      el.textContent = (Math.round(start + range * eased) / 10).toFixed(1).replace('.0', '') + suffix;
+      if (progress < 1) requestAnimationFrame(update);
+    }
+    requestAnimationFrame(update);
+  }
+
+  // Trigger counter animation on hero stats visible
+  const statsObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const nums = entry.target.querySelectorAll(".stat-num");
+        nums[0] && animateValue(nums[0], 0, 24, 1500, "K+");
+        nums[1] && animateValue(nums[1], 0, 180, 1800, "K+");
+        statsObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const statsEl = document.querySelector(".hero-stats");
+    if (statsEl) statsObserver.observe(statsEl);
+  });
+</script>
+
+</body>
+</html>
