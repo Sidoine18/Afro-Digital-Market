@@ -68,22 +68,30 @@
         updateAuthUI(user);
         await loadUserOrders(user.uid);
       } else {
-        // auto sign-in anonymously so orders can be persisted
+        // Auto sign-in anonymously so order tracking works without account
         try { await signInAnonymously(auth); }
-        catch(e) { console.warn("Auth error:", e); }
+        catch(e) { console.warn("Auth anon error:", e); }
       }
     });
 
     function updateAuthUI(user) {
-      const authBtn = document.getElementById("authBtn");
-      if (authBtn) {
-        if (user && !user.isAnonymous) {
-          authBtn.textContent = "Déconnexion";
-          authBtn.onclick = () => signOut(auth);
-        } else {
-          authBtn.textContent = "Connexion";
-          authBtn.onclick = () => openAuthModal();
-        }
+      const authBtn     = document.getElementById("authBtn");
+      const authBtnMob  = document.getElementById("authBtnMobile");
+      const dashBtn     = document.getElementById("navDashBtn");
+      const dashBtnMob  = document.getElementById("dashBtnMobile");
+
+      if (user && !user.isAnonymous) {
+        // Logged-in real user
+        if (authBtn)    { authBtn.textContent = "Déconnexion"; authBtn.href = "#"; authBtn.onclick = (e) => { e.preventDefault(); signOut(auth); }; }
+        if (authBtnMob) { authBtnMob.textContent = "Déconnexion"; authBtnMob.href = "#"; authBtnMob.onclick = (e) => { e.preventDefault(); signOut(auth); toggleDrawer(); }; }
+        if (dashBtn)    { dashBtn.style.display = "inline-flex"; }
+        if (dashBtnMob) { dashBtnMob.style.display = "block"; }
+      } else {
+        // Anonymous or logged out
+        if (authBtn)    { authBtn.textContent = "Connexion"; authBtn.href = "login.html"; authBtn.onclick = null; }
+        if (authBtnMob) { authBtnMob.textContent = "Connexion"; authBtnMob.href = "login.html"; authBtnMob.onclick = null; }
+        if (dashBtn)    { dashBtn.style.display = "none"; }
+        if (dashBtnMob) { dashBtnMob.style.display = "none"; }
       }
     }
 
@@ -285,9 +293,13 @@
       const product = allProducts.find(x => x.id === productId);
       if (!product) return;
 
-      if (!currentUser) {
-        showToast("warning", "Connexion requise", "Veuillez vous connecter pour acheter.");
-        openAuthModal();
+      // Redirect anonymous/logged-out users to login page
+      if (!currentUser || currentUser.isAnonymous) {
+        // Save intended product in sessionStorage so login can redirect back
+        sessionStorage.setItem("adm_pending_product", productId);
+        sessionStorage.setItem("adm_redirect_after_login", "shop.html");
+        showToast("warning", "Connexion requise", "Vous allez être redirigé vers la page de connexion.");
+        setTimeout(() => { window.location.href = "login.html"; }, 1400);
         return;
       }
 
@@ -365,8 +377,9 @@
        SECURE DOWNLOAD — validate before serving
     ══════════════════════════════════════ */
     window.triggerDownload = async function(productId, fileUrl) {
-      if (!currentUser) {
+      if (!currentUser || currentUser.isAnonymous) {
         showToast("warning", "Non connecté", "Connexion requise pour télécharger.");
+        setTimeout(() => { window.location.href = "login.html"; }, 1200);
         return;
       }
 
@@ -392,9 +405,32 @@
           return;
         }
 
-        // Open secure Cloudinary link
-        window.open(fileUrl, "_blank", "noopener,noreferrer");
-        showToast("success", "Téléchargement lancé !", "Votre document s'ouvre dans un nouvel onglet.");
+        /* ── Cloudinary fl_attachment trick ──────────────────────────────
+           Instead of opening the URL (which may open in-browser or 401),
+           inject fl_attachment into the Cloudinary URL to force download.
+           Works for both /image/upload/ and /raw/upload/ resources.
+           ────────────────────────────────────────────────────────────── */
+        let dlUrl = fileUrl;
+        try {
+          dlUrl = fileUrl.replace(/\/upload\/(?!fl_attachment)/, "/upload/fl_attachment/");
+        } catch (_) { dlUrl = fileUrl; }
+
+        // Get a clean filename from the URL
+        const rawName = decodeURIComponent(fileUrl.split("/").pop().split("?")[0]) || "document";
+        const ext = rawName.split(".").pop().toLowerCase();
+        const safeExt = ["pdf","epub","zip","docx"].includes(ext) ? ext : "pdf";
+        const filename = rawName.replace(/[^a-zA-Z0-9À-ÿ\s\-_.]/g, "").trim() || `document.${safeExt}`;
+
+        const a = document.createElement("a");
+        a.href     = dlUrl;
+        a.download = filename;
+        a.target   = "_blank";
+        a.rel      = "noopener noreferrer";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        showToast("success", "Téléchargement lancé !", "Votre document se télécharge.");
 
       } catch(err) {
         console.error("Download validation error:", err);
@@ -594,7 +630,33 @@
       initCategoryFilters();
       initProductsListener();
       initNavbar();
+      readCategoryFromIndex();
     });
+
+    /* Read category filter passed from index.html via sessionStorage */
+    function readCategoryFromIndex() {
+      const cat = sessionStorage.getItem("adm_cat_filter");
+      if (cat) {
+        sessionStorage.removeItem("adm_cat_filter");
+        // Wait for products to load then apply filter
+        setTimeout(() => {
+          const btn = document.querySelector(`.cat-filter-btn[data-cat="${cat}"]`);
+          if (btn) {
+            btn.click();
+          } else {
+            activeCategories.add(cat);
+            applyFilters();
+          }
+        }, 800);
+      }
+      // Check if user just came back from login with a pending product
+      const pendingId = sessionStorage.getItem("adm_pending_product");
+      if (pendingId) {
+        sessionStorage.removeItem("adm_pending_product");
+        // Wait for auth + products to load
+        setTimeout(() => { window.initiatePurchase(pendingId); }, 1200);
+      }
+    }
 
     function initNavbar() {
       const nav = document.getElementById("mainNav");
@@ -1421,8 +1483,10 @@
 <nav class="mobile-drawer" id="mobileDrawer">
   <button class="tab-btn" data-tab="shop"      onclick="showTab('shop');      toggleDrawer()">Boutique</button>
   <button class="tab-btn" data-tab="purchases" onclick="showTab('purchases'); toggleDrawer()">Mes achats</button>
-  <button class="btn-ghost-sm" id="authBtnMobile" onclick="openAuthModal(); toggleDrawer()">Connexion</button>
-  <button class="btn-primary-sm" onclick="toggleDrawer()">Fermer</button>
+  <a href="index.html"     class="tab-btn"     onclick="toggleDrawer()">Accueil</a>
+  <a href="login.html"     class="tab-btn"     id="authBtnMobile">Connexion</a>
+  <a href="dashboard.html" class="tab-btn"     id="dashBtnMobile" style="display:none">Dashboard</a>
+  <button class="btn-primary-sm" onclick="toggleDrawer()">Fermer ✕</button>
 </nav>
 
 <!-- ═══════════════════════════════════════
@@ -1431,20 +1495,30 @@
 <header class="navbar" id="mainNav">
   <div class="container">
     <div class="nav-wrap">
+      <!-- Logo -->
       <a href="index.html" class="nav-logo">
         <div class="nav-logo-icon">🌍</div>
         <span>Afro <span>Digital</span> Market</span>
       </a>
 
+      <!-- Center tab nav (desktop) -->
       <ul class="nav-tabs">
-        <li><a href="dashboard.html" class="tab-btn">Dashboard</a></li>
-        <li><a href="login.html" class="tab-btn">Connexion</a></li>
+        <li>
+          <button class="tab-btn active" data-tab="shop" onclick="showTab('shop')">Boutique</button>
+        </li>
+        <li>
+          <button class="tab-btn" data-tab="purchases" onclick="showTab('purchases')">Mes achats</button>
+        </li>
         <li><a href="index.html" class="tab-btn">Accueil</a></li>
       </ul>
 
+      <!-- Right CTAs -->
       <div class="nav-right">
-        <li><a href="dashboard.html" class="tab-btn">Dashboard</a></li>
-        <li><a href="login.html" class="tab-btn">Connexion</a></li>
+        <a href="dashboard.html" class="btn-ghost-sm" id="navDashBtn" style="display:none">
+          Dashboard
+        </a>
+        <a href="login.html" class="btn-ghost-sm" id="authBtn">Connexion</a>
+        <button class="btn-primary-sm" onclick="window.location.href='login.html'">Commencer</button>
         <button class="hamburger" id="hamburgerBtn" onclick="toggleDrawer()" aria-label="Menu">
           <span></span><span></span><span></span>
         </button>
@@ -1576,39 +1650,9 @@
 </div>
 
 <!-- ═══════════════════════════════════════
-     AUTH MODAL
+     AUTH REDIRECT PANEL (replaces inline modal)
+     Users are redirected to login.html for auth
 ═══════════════════════════════════════ -->
-<div class="modal-overlay" id="authModal" onclick="handleAuthModalClick(event)">
-  <div class="auth-panel" id="authPanel">
-    <h2 class="auth-title">Bienvenue 👋</h2>
-    <p class="auth-sub">Connectez-vous pour acheter et télécharger vos documents.</p>
-
-    <div class="auth-toggle">
-      <button class="auth-toggle-btn active" id="loginToggle"    onclick="setAuthMode('login')">Se connecter</button>
-      <button class="auth-toggle-btn"        id="registerToggle" onclick="setAuthMode('register')">S'inscrire</button>
-    </div>
-
-    <form onsubmit="handleAuthSubmit(event)">
-      <input type="hidden" id="authMode" value="login"/>
-      <div class="form-group">
-        <label for="authEmail">Adresse email</label>
-        <input type="email" id="authEmail" placeholder="vous@example.com" required autocomplete="email"/>
-      </div>
-      <div class="form-group">
-        <label for="authPassword">Mot de passe</label>
-        <input type="password" id="authPassword" placeholder="••••••••" required minlength="6" autocomplete="current-password"/>
-      </div>
-      <button type="submit" class="btn-auth-submit" id="authSubmitBtn">Se connecter</button>
-    </form>
-
-    <p style="margin-top:16px; text-align:center; font-size:.8rem; color:var(--muted);">
-      Ou continuez en tant qu'invité — vos achats seront sauvegardés localement.
-    </p>
-    <button onclick="closeAuthModal()" style="display:block; margin:10px auto 0; background:none; color:var(--muted); font-size:.8rem; cursor:pointer;">
-      Continuer sans compte →
-    </button>
-  </div>
-</div>
 
 <!-- ═══════════════════════════════════════
      FOOTER
@@ -1621,12 +1665,6 @@
      NON-MODULE JAVASCRIPT (UI helpers)
 ═══════════════════════════════════════ -->
 <script>
-  /* Global vars exposed from module scope via window */
-  let searchQuery = "";
-  let activeCategories = new Set();
-  let allProducts = [];
-  let filteredProducts = [];
-
   /* ── Tab Navigation ── */
   function showTab(tab) {
     document.querySelectorAll(".tab-section").forEach(s => s.classList.remove("active"));
@@ -1644,46 +1682,31 @@
     document.body.style.overflow = open ? "hidden" : "";
   }
 
+  /* ── Close drawer on outside click ── */
+  document.getElementById("mobileDrawer").addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) toggleDrawer();
+  });
+
   /* ── Modal click-outside close ── */
   function handleModalClick(e) {
     if (e.target === document.getElementById("productModal")) closeProductModal();
-  }
-  function handleAuthModalClick(e) {
-    if (e.target === document.getElementById("authModal")) closeAuthModal();
   }
   function closeProductModal() {
     document.getElementById("productModal").classList.remove("open");
     document.body.style.overflow = "";
   }
-  function closeAuthModal() {
-    document.getElementById("authModal").classList.remove("open");
-    document.body.style.overflow = "";
-  }
-  function openAuthModal() {
-    document.getElementById("authModal").classList.add("open");
-    document.body.style.overflow = "hidden";
-  }
+  /* Stubs kept for backward compatibility with module scope calls */
+  function openAuthModal()  { window.location.href = "login.html"; }
+  function closeAuthModal() {}
+  function handleAuthModalClick() {}
+  function setAuthMode() {}
 
-  /* ── Auth mode toggle ── */
-  function setAuthMode(mode) {
-    document.getElementById("authMode").value = mode;
-    document.getElementById("authSubmitBtn").textContent = mode === "login" ? "Se connecter" : "Créer un compte";
-    document.getElementById("loginToggle").classList.toggle("active",    mode === "login");
-    document.getElementById("registerToggle").classList.toggle("active", mode === "register");
-    document.getElementById("authPassword").autocomplete = mode === "login" ? "current-password" : "new-password";
-  }
-
-  /* ── applyFilters (exposed for search clear button) ── */
-  function applyFilters() {
-    /* delegated to module — the module overrides this via closure */
-  }
+  /* ── applyFilters stub (module overrides) ── */
+  function applyFilters() { /* overridden by Firebase module */ }
 
   /* ── Keyboard: Escape closes modals ── */
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
-      closeProductModal();
-      closeAuthModal();
-    }
+    if (e.key === "Escape") closeProductModal();
   });
 </script>
 
