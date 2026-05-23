@@ -63,22 +63,23 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;
 .nav{position:sticky;top:0;z-index:400;background:rgba(3,3,10,.88);
   backdrop-filter:blur(22px);border-bottom:1px solid var(--border);padding:14px 0}
 .nav-inner{max-width:1200px;margin:0 auto;padding:0 20px;
-  display:flex;align-items:center;justify-content:space-between;gap:16px}
+  display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
 .logo{display:flex;align-items:center;gap:9px;font-family:var(--fd);
-  font-weight:900;font-size:1.1rem;white-space:nowrap}
+  font-weight:900;font-size:1.1rem;white-space:nowrap;min-width:0;flex:1 1 auto;overflow:hidden}
+.logo-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .logo-ico{width:32px;height:32px;background:var(--gh);border-radius:8px;
   display:flex;align-items:center;justify-content:center;font-size:16px;
   box-shadow:0 0 16px rgba(123,97,255,.5);flex-shrink:0}
 .logo span{color:var(--cyan)}
-.nav-cta{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.nav-cta{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .btn-nav-g{background:var(--glass);border:1px solid var(--border);
-  color:var(--white);padding:8px 16px;border-radius:var(--rsm);
-  font-size:.82rem;font-weight:500;transition:var(--tr);display:inline-flex;align-items:center;gap:6px}
+  color:var(--white);padding:8px 12px;border-radius:var(--rsm);
+  font-size:.82rem;font-weight:500;transition:var(--tr);display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
 .btn-nav-g:hover{border-color:var(--v);color:var(--v2)}
-.btn-nav-p{background:var(--gb);color:#fff;padding:8px 16px;
+.btn-nav-p{background:var(--gb);color:#fff;padding:8px 12px;
   border-radius:var(--rsm);font-size:.82rem;font-weight:600;
   box-shadow:0 0 18px rgba(123,97,255,.4);transition:var(--tr);
-  display:inline-flex;align-items:center;gap:6px}
+  display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
 .btn-nav-p:hover{transform:translateY(-1px);box-shadow:0 4px 24px rgba(123,97,255,.6)}
 
 /* ══ PAGE LOADER ════════════════════════════════════════════════════ */
@@ -101,10 +102,10 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;
 /* ══ HERO BG ════════════════════════════════════════════════════════ */
 .page-hero{position:relative;overflow:hidden;padding:60px 0 0}
 .hero-orb{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none}
-.orb1{width:500px;height:500px;
+.orb1{width:min(500px,90vw);height:min(500px,90vw);
   background:radial-gradient(circle,rgba(123,97,255,.2),transparent 70%);
   top:-100px;left:-120px;animation:ob 10s ease-in-out infinite}
-.orb2{width:380px;height:380px;
+.orb2{width:min(380px,70vw);height:min(380px,70vw);
   background:radial-gradient(circle,rgba(0,212,255,.14),transparent 70%);
   top:50px;right:-80px;animation:ob 13s ease-in-out infinite reverse}
 @keyframes ob{0%,100%{transform:translateY(0)}50%{transform:translateY(-24px)}}
@@ -167,7 +168,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;
 
 /* Seller info */
 .seller-card{background:var(--card);border:1px solid var(--border);
-  border-radius:var(--rmd);padding:18px;display:flex;align-items:center;gap:14px;
+  border-radius:var(--rmd);padding:18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
   margin-top:32px;backdrop-filter:blur(10px)}
 .seller-av{width:46px;height:46px;border-radius:50%;background:var(--gh);
   display:flex;align-items:center;justify-content:center;font-family:var(--fd);
@@ -311,26 +312,105 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;
   font-size:.78rem;font-weight:600;border:none;cursor:pointer;white-space:nowrap;transition:var(--tr)}
 .share-copy-btn:hover{filter:brightness(1.1)}
 
+/* ══ BUY CARD META ROWS ════════════════════════════════════════════ */
+.buy-meta-rows{display:flex;flex-direction:column;gap:8px}
+.buy-meta-row{display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:4px;font-size:.78rem}
+.buy-meta-row span:last-child{text-align:right;word-break:break-word;max-width:60%}
+
 /* ══ RESPONSIVE ══════════════════════════════════════════════════════ */
+
+/* ── Tablette (≤ 900px) ─────────────────────────────────────────── */
 @media(max-width:900px){
-  .product-wrap{grid-template-columns:1fr;gap:32px}
+  .product-wrap{grid-template-columns:1fr;gap:28px}
   .buy-card{position:static;order:-1;border-radius:var(--rlg)}
   .related-grid{grid-template-columns:repeat(2,1fr)}
-  .prod-features{grid-template-columns:1fr}
+  .prod-features{grid-template-columns:1fr 1fr}
 }
+
+/* ── Mobile large (≤ 640px) ─────────────────────────────────────── */
 @media(max-width:640px){
-  .product-wrap{padding:20px 14px 60px}
-  .prod-title{font-size:1.7rem}
-  .buy-price{font-size:2.2rem}
-  .related-grid{grid-template-columns:repeat(2,1fr);gap:10px}
-  .share-opts{grid-template-columns:repeat(4,1fr)}
-  .bc{padding:12px 14px 0}
-  .nav-inner{padding:0 14px}
-  .toast{left:12px;right:12px;bottom:12px;max-width:none}
+  /* Layout */
+  .product-wrap{padding:16px 14px 60px;gap:20px}
+  .page-hero{padding:40px 0 0}
+
+  /* Navbar */
+  .nav-inner{padding:0 14px;gap:8px}
+  .logo{font-size:.95rem}
+  .logo-ico{width:28px;height:28px;font-size:14px}
+
+  /* Breadcrumb */
+  .bc{padding:10px 14px 0;font-size:.72rem;gap:5px}
+
+  /* Product title & text */
+  .prod-title{font-size:clamp(1.45rem,5.5vw,1.9rem)}
+  .prod-desc{font-size:.88rem}
+  .prod-desc-ttl{font-size:.95rem;margin-top:22px}
+  .prod-cat-lbl{font-size:.7rem}
+
+  /* Cover */
+  .cover-wrap{margin-bottom:24px;border-radius:var(--rmd)}
+  .cover-badges{top:10px;left:10px;gap:6px}
+  .cbadge{font-size:.65rem;padding:3px 9px}
+
+  /* Features grid → 1 col */
+  .prod-features{grid-template-columns:1fr;gap:8px;margin:20px 0}
+  .pf{font-size:.8rem;padding:10px 12px}
+
+  /* Seller card */
+  .seller-card{padding:14px;gap:10px;margin-top:22px}
+  .seller-av{width:40px;height:40px;font-size:.95rem}
+
+  /* Buy card */
+  .buy-card{padding:20px 16px;border-radius:var(--rmd)}
+  .buy-price{font-size:clamp(1.8rem,7vw,2.4rem)}
+  .buy-price-label{font-size:.72rem;margin-bottom:16px}
+  .btn-buy-main{padding:14px 12px;font-size:.92rem}
+  .btn-dl-main{padding:14px 12px;font-size:.92rem}
+  .btn-share{padding:11px 12px;font-size:.82rem}
+  .buy-trust{gap:7px}
+  .bt-item{font-size:.74rem}
+  .bc-sep-line{margin:14px 0}
+
+  /* Related */
+  .related-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+  .related-ttl{font-size:.95rem;margin:32px 0 14px}
+  .rc-img{height:90px}
+  .rc-body{padding:10px}
+  .rc-ttl{font-size:.78rem}
+  .rc-price{font-size:.78rem}
+
+  /* Share drawer */
+  .share-drawer{padding:20px 16px 28px}
+  .share-opts{grid-template-columns:repeat(4,1fr);gap:10px}
+  .sh-ico-wrap{width:44px;height:44px;font-size:18px}
+  .sh-lbl{font-size:.66rem}
+
+  /* Toast */
+  .toast{left:10px;right:10px;bottom:10px;max-width:none;padding:11px 14px}
+  #t-ttl{font-size:.8rem}
+  #t-msg{font-size:.72rem}
+
+  /* Pay success */
+  #paySuccess h2{font-size:1.5rem}
+  #paySuccess p{font-size:.84rem}
+  .btn-ps-close{padding:12px 24px;font-size:.88rem}
 }
-@media(max-width:380px){
+
+/* ── Mobile XS (≤ 400px) ────────────────────────────────────────── */
+@media(max-width:400px){
+  .nav-inner{padding:0 12px}
+  .logo{font-size:.88rem;gap:7px}
+  .btn-nav-g{padding:7px 10px;font-size:.76rem}
+  .btn-nav-p{padding:7px 10px;font-size:.76rem}
+
+  .product-wrap{padding:12px 10px 60px}
+  .buy-card{padding:16px 12px}
+  .buy-price{font-size:1.7rem}
+
   .related-grid{grid-template-columns:1fr}
-  .share-opts{grid-template-columns:repeat(2,1fr)}
+  .share-opts{grid-template-columns:repeat(4,1fr);gap:8px}
+  .sh-ico-wrap{width:40px;height:40px;font-size:16px}
 }
 </style>
 </head>
@@ -409,7 +489,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;
   <div class="nav-inner">
     <a href="index.html" class="logo">
       <div class="logo-ico">🌍</div>
-      <span>Afro <span>Digital</span> Market</span>
+      <span class="logo-txt">Afro <span>Digital</span> Market</span>
     </a>
     <div class="nav-cta">
       <a href="shop.html" class="btn-nav-g">
@@ -544,16 +624,16 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;
       <hr class="bc-sep-line"/>
 
       <!-- Metadata -->
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <div style="display:flex;justify-content:space-between;font-size:.78rem">
+      <div class="buy-meta-rows">
+        <div class="buy-meta-row">
           <span style="color:var(--muted)">Catégorie</span>
           <span id="bcMetaCat" style="font-weight:600"></span>
         </div>
-        <div style="display:flex;justify-content:space-between;font-size:.78rem">
+        <div class="buy-meta-row">
           <span style="color:var(--muted)">Format</span>
           <span style="font-weight:600">PDF / Document digital</span>
         </div>
-        <div style="display:flex;justify-content:space-between;font-size:.78rem" id="metaDateRow">
+        <div class="buy-meta-row" id="metaDateRow">
           <span style="color:var(--muted)">Publié le</span>
           <span id="bcMetaDate" style="font-weight:600"></span>
         </div>
