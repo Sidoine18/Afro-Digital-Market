@@ -184,7 +184,7 @@
       const price = p.price ? `${Number(p.price).toLocaleString("fr-FR")} FCFA` : "Gratuit";
 
       return `
-      <article class="product-card" data-id="${esc(p.id)}" onclick="openProductModal('${esc(p.id)}')">
+      <article class="product-card" data-id="${esc(p.id)}" onclick="location.href='produit.html?id=${toSlug(p.title||p.id)}'">
         <div class="card-img-wrap">
           <img src="${esc(img)}" alt="${esc(p.title || '')}" loading="lazy"
                onerror="this.src='https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500&q=80'"/>
@@ -200,10 +200,10 @@
             <div class="card-price">${price}</div>
           </div>
           <div class="card-actions" onclick="event.stopPropagation()">
-            <button class="btn-details" onclick="openProductModal('${esc(p.id)}')">
+            <a class="btn-details" href="produit.html?id=${toSlug(p.title||p.id)}">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              Détails
-            </button>
+              Voir
+            </a>
             ${purchased
               ? `<button class="btn-download" onclick="triggerDownload('${esc(p.id)}','${esc(p.fileUrl||'')}')">
                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -620,6 +620,18 @@
       const d = document.createElement("div");
       d.appendChild(document.createTextNode(String(str || "")));
       return d.innerHTML;
+    }
+
+    // Title → URL slug  e.g. "Guide Business Plan" → "guide-business-plan"
+    function toSlug(str) {
+      return String(str || "")
+        .toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9\s-]/g, "")
+        .trim()
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .slice(0, 80);
     }
 
     /* ══════════════════════════════════════
