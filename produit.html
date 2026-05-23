@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<!-- Dynamic OG tags updated by JS -->
+<title>Chargement… — Afro Digital Market</title>
+<meta name="description" id="metaDesc" content="Découvrez ce document premium sur Afro Digital Market."/>
+<meta property="og:title"       id="ogTitle"  content="Afro Digital Market"/>
+<meta property="og:description" id="ogDesc"   content="Document digital premium"/>
+<meta property="og:image"       id="ogImg"    content=""/>
+<meta property="og:url"         id="ogUrl"    content=""/>
+<meta property="og:type"        content="product"/>
+<meta name="twitter:card"       content="summary_large_image"/>
+
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+
+<!-- FedaPay -->
+<script src="https://cdn.fedapay.com/checkout.js?v=1.1.7"></script>
+
+<style>
+/* ══ TOKENS ══════════════════════════════════════════════════════════ */
+:root{
+  --void:#03030a; --deep:#07071a; --card:rgba(10,10,26,.9);
+  --glass:rgba(255,255,255,.04); --glass2:rgba(255,255,255,.07);
+  --border:rgba(255,255,255,.08); --glow:rgba(123,97,255,.32);
+  --white:#f0efff; --muted:rgba(200,193,255,.55); --dim:rgba(200,193,255,.28);
+  --v:#7b61ff; --v2:#a08cff; --cyan:#00d4ff; --gold:#ffd166;
+  --green:#22d3a5; --red:#ff4d6d;
+  --gh:linear-gradient(135deg,#7b61ff,#00d4ff);
+  --gb:linear-gradient(135deg,#7b61ff,#4f3bcc);
+  --gt:linear-gradient(90deg,#7b61ff,#00d4ff,#7b61ff);
+  --gg:linear-gradient(135deg,#22d3a5,#10b981);
+  --fd:'Syne',sans-serif; --fb:'DM Sans',sans-serif;
+  --rsm:10px; --rmd:16px; --rlg:24px; --rxl:36px;
+  --tr:.3s cubic-bezier(.25,.46,.45,.94);
+  --sh:0 8px 48px rgba(0,0,0,.55);
+  --sg:0 0 56px rgba(123,97,255,.2);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:var(--fb);background:var(--void);color:var(--white);
+  overflow-x:hidden;line-height:1.65;min-height:100vh}
+img{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+button{font-family:var(--fb);cursor:pointer;border:none;outline:none}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--deep)}
+::-webkit-scrollbar-thumb{background:var(--v);border-radius:5px}
+
+/* noise */
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.38;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")}
+
+/* ══ GRADIENT TEXT ══════════════════════════════════════════════════ */
+.gt{background:var(--gt);background-size:200% auto;-webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;background-clip:text;animation:gsh 4s linear infinite}
+@keyframes gsh{to{background-position:200% center}}
+
+/* ══ NAVBAR ═════════════════════════════════════════════════════════ */
+.nav{position:sticky;top:0;z-index:400;background:rgba(3,3,10,.88);
+  backdrop-filter:blur(22px);border-bottom:1px solid var(--border);padding:14px 0}
+.nav-inner{max-width:1200px;margin:0 auto;padding:0 20px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px}
+.logo{display:flex;align-items:center;gap:9px;font-family:var(--fd);
+  font-weight:900;font-size:1.1rem;white-space:nowrap}
+.logo-ico{width:32px;height:32px;background:var(--gh);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;font-size:16px;
+  box-shadow:0 0 16px rgba(123,97,255,.5);flex-shrink:0}
+.logo span{color:var(--cyan)}
+.nav-cta{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.btn-nav-g{background:var(--glass);border:1px solid var(--border);
+  color:var(--white);padding:8px 16px;border-radius:var(--rsm);
+  font-size:.82rem;font-weight:500;transition:var(--tr);display:inline-flex;align-items:center;gap:6px}
+.btn-nav-g:hover{border-color:var(--v);color:var(--v2)}
+.btn-nav-p{background:var(--gb);color:#fff;padding:8px 16px;
+  border-radius:var(--rsm);font-size:.82rem;font-weight:600;
+  box-shadow:0 0 18px rgba(123,97,255,.4);transition:var(--tr);
+  display:inline-flex;align-items:center;gap:6px}
+.btn-nav-p:hover{transform:translateY(-1px);box-shadow:0 4px 24px rgba(123,97,255,.6)}
+
+/* ══ PAGE LOADER ════════════════════════════════════════════════════ */
+#pageLoader{
+  min-height:calc(100vh - 64px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+}
+.spin{width:48px;height:48px;border:3px solid var(--border);
+  border-top-color:var(--v);border-radius:50%;animation:spin .75s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ══ ERROR STATE ════════════════════════════════════════════════════ */
+#errState{display:none;min-height:calc(100vh - 64px);
+  flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  text-align:center;padding:40px 20px}
+.err-ico{font-size:4rem;opacity:.35}
+.err-ttl{font-family:var(--fd);font-size:1.5rem;font-weight:800}
+.err-msg{font-size:.9rem;color:var(--muted);max-width:400px}
+
+/* ══ HERO BG ════════════════════════════════════════════════════════ */
+.page-hero{position:relative;overflow:hidden;padding:60px 0 0}
+.hero-orb{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none}
+.orb1{width:500px;height:500px;
+  background:radial-gradient(circle,rgba(123,97,255,.2),transparent 70%);
+  top:-100px;left:-120px;animation:ob 10s ease-in-out infinite}
+.orb2{width:380px;height:380px;
+  background:radial-gradient(circle,rgba(0,212,255,.14),transparent 70%);
+  top:50px;right:-80px;animation:ob 13s ease-in-out infinite reverse}
+@keyframes ob{0%,100%{transform:translateY(0)}50%{transform:translateY(-24px)}}
+.hero-grid{position:absolute;inset:0;
+  background-image:linear-gradient(rgba(123,97,255,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(123,97,255,.04) 1px,transparent 1px);
+  background-size:56px 56px;
+  mask-image:radial-gradient(ellipse at 50% 0%,black 20%,transparent 75%);
+  pointer-events:none}
+
+/* ══ BREADCRUMB ═════════════════════════════════════════════════════ */
+.bc{max-width:1200px;margin:0 auto;padding:18px 20px 0;
+  display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--muted);
+  flex-wrap:wrap;position:relative;z-index:1}
+.bc a{color:var(--muted);transition:color .2s}
+.bc a:hover{color:var(--white)}
+.bc-sep{opacity:.4}
+
+/* ══ MAIN LAYOUT ════════════════════════════════════════════════════ */
+#productContent{display:none}
+.product-wrap{max-width:1200px;margin:0 auto;padding:32px 20px 80px;
+  display:grid;grid-template-columns:1fr 380px;gap:48px;align-items:start}
+
+/* ══ LEFT — PRODUCT DETAIL ══════════════════════════════════════════ */
+.prod-left{}
+
+/* Cover image */
+.cover-wrap{border-radius:var(--rlg);overflow:hidden;position:relative;
+  margin-bottom:36px;box-shadow:var(--sh);aspect-ratio:16/9;background:var(--deep)}
+.cover-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+.cover-overlay{position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(3,3,10,.55),transparent 50%)}
+.cover-badges{position:absolute;top:16px;left:16px;display:flex;gap:8px;flex-wrap:wrap}
+.cbadge{font-size:.7rem;font-weight:700;padding:4px 12px;border-radius:99px;
+  backdrop-filter:blur(8px)}
+.cbadge-prem{background:linear-gradient(135deg,#ffd166,#f79d65);color:#0a0a0a}
+.cbadge-cat{background:rgba(3,3,10,.75);border:1px solid var(--border);color:var(--muted)}
+
+/* Title block */
+.prod-cat-lbl{font-size:.74rem;font-weight:700;color:var(--v2);text-transform:uppercase;
+  letter-spacing:.1em;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.prod-title{font-family:var(--fd);font-size:clamp(1.7rem,3.5vw,2.8rem);
+  font-weight:900;line-height:1.1;margin-bottom:16px}
+.prod-stars{display:flex;align-items:center;gap:6px;margin-bottom:18px}
+.star-svg{width:16px;height:16px}
+.star-svg.f{fill:var(--gold)} .star-svg.h{fill:var(--gold);opacity:.5}
+.star-svg.e{fill:rgba(255,255,255,.15)}
+.prod-stars span{font-size:.85rem;color:var(--muted)}
+.prod-desc-ttl{font-family:var(--fd);font-size:1rem;font-weight:700;
+  margin-bottom:12px;margin-top:28px}
+.prod-desc{font-size:.92rem;color:var(--muted);line-height:1.8;
+  white-space:pre-wrap;word-break:break-word}
+
+/* Feature list */
+.prod-features{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:28px 0}
+.pf{display:flex;align-items:center;gap:10px;background:var(--glass);
+  border:1px solid var(--border);border-radius:var(--rsm);padding:11px 14px;
+  font-size:.82rem;color:var(--muted)}
+.pf-ico{font-size:16px;flex-shrink:0}
+
+/* Seller info */
+.seller-card{background:var(--card);border:1px solid var(--border);
+  border-radius:var(--rmd);padding:18px;display:flex;align-items:center;gap:14px;
+  margin-top:32px;backdrop-filter:blur(10px)}
+.seller-av{width:46px;height:46px;border-radius:50%;background:var(--gh);
+  display:flex;align-items:center;justify-content:center;font-family:var(--fd);
+  font-size:1.1rem;font-weight:800;color:#fff;overflow:hidden;flex-shrink:0}
+.seller-av img{width:100%;height:100%;object-fit:cover}
+.seller-name{font-family:var(--fd);font-size:.88rem;font-weight:700}
+.seller-lbl{font-size:.72rem;color:var(--muted);margin-top:2px}
+
+/* Related products */
+.related-ttl{font-family:var(--fd);font-size:1.05rem;font-weight:800;margin:44px 0 20px}
+.related-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.rc{background:var(--card);border:1px solid var(--border);border-radius:var(--rmd);
+  overflow:hidden;cursor:pointer;transition:var(--tr);text-decoration:none;display:block;color:inherit}
+.rc:hover{border-color:var(--glow);transform:translateY(-4px)}
+.rc-img{height:110px;overflow:hidden}
+.rc-img img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.rc:hover .rc-img img{transform:scale(1.06)}
+.rc-body{padding:12px}
+.rc-ttl{font-family:var(--fd);font-size:.82rem;font-weight:700;margin-bottom:4px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.rc-price{font-size:.82rem;color:var(--v2);font-weight:700}
+
+/* ══ RIGHT — BUY CARD ═══════════════════════════════════════════════ */
+.buy-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rxl);
+  padding:28px;position:sticky;top:86px;backdrop-filter:blur(20px);
+  box-shadow:var(--sh),var(--sg)}
+
+.buy-price{font-family:var(--fd);font-size:2.8rem;font-weight:900;
+  line-height:1;margin-bottom:6px}
+.buy-price-label{font-size:.76rem;color:var(--muted);margin-bottom:22px}
+
+/* Primary action button */
+.btn-buy-main{width:100%;background:var(--gb);color:#fff;
+  padding:16px;border-radius:var(--rmd);font-family:var(--fd);font-size:1rem;
+  font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px;
+  box-shadow:0 0 36px rgba(123,97,255,.5);transition:var(--tr);margin-bottom:12px;
+  position:relative;overflow:hidden}
+.btn-buy-main::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.1),transparent);
+  opacity:0;transition:opacity .3s}
+.btn-buy-main:hover:not(:disabled){transform:translateY(-2px);
+  box-shadow:0 8px 48px rgba(123,97,255,.7)}
+.btn-buy-main:hover:not(:disabled)::after{opacity:1}
+.btn-buy-main:disabled{opacity:.55;cursor:not-allowed;transform:none}
+
+/* Download button (after purchase) */
+.btn-dl-main{width:100%;background:var(--gg);color:#fff;
+  padding:16px;border-radius:var(--rmd);font-family:var(--fd);font-size:1rem;
+  font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px;
+  box-shadow:0 0 32px rgba(34,211,165,.4);transition:var(--tr);margin-bottom:12px}
+.btn-dl-main:hover{transform:translateY(-2px);box-shadow:0 8px 40px rgba(34,211,165,.6)}
+
+/* Purchased badge */
+.purchased-banner{background:rgba(34,211,165,.1);border:1px solid rgba(34,211,165,.3);
+  border-radius:var(--rsm);padding:11px 16px;text-align:center;
+  color:var(--green);font-size:.82rem;font-weight:600;margin-bottom:14px;
+  display:none}
+.purchased-banner.show{display:block}
+
+/* Share button */
+.btn-share{width:100%;background:var(--glass);border:1px solid var(--border);
+  color:var(--white);padding:13px;border-radius:var(--rmd);
+  font-size:.875rem;font-weight:600;display:flex;align-items:center;
+  justify-content:center;gap:9px;transition:var(--tr)}
+.btn-share:hover{border-color:var(--v);background:rgba(123,97,255,.1)}
+
+/* Buy card divider */
+.bc-sep-line{border:none;border-top:1px solid var(--border);margin:20px 0}
+
+/* Trust items in buy card */
+.buy-trust{display:flex;flex-direction:column;gap:9px}
+.bt-item{display:flex;align-items:center;gap:10px;font-size:.78rem;color:var(--muted)}
+.bt-ico{font-size:14px;flex-shrink:0;width:20px;text-align:center}
+
+/* Payment loader overlay */
+#payLoader{position:fixed;inset:0;z-index:800;
+  background:rgba(3,3,10,.92);backdrop-filter:blur(14px);
+  display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+#payLoader.on{display:flex}
+#payLoader p{font-family:var(--fd);font-size:1rem;font-weight:700;color:var(--muted)}
+
+/* Payment success overlay */
+#paySuccess{position:fixed;inset:0;z-index:801;
+  background:rgba(3,3,10,.95);backdrop-filter:blur(18px);
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  gap:18px;text-align:center;padding:24px}
+#paySuccess.on{display:flex}
+.ps-ring{width:88px;height:88px;border-radius:50%;
+  background:rgba(34,211,165,.1);border:2px solid var(--green);
+  display:flex;align-items:center;justify-content:center;font-size:40px;
+  animation:popIn .5s cubic-bezier(.175,.885,.32,1.275)}
+@keyframes popIn{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+#paySuccess h2{font-family:var(--fd);font-size:1.9rem;font-weight:900}
+#paySuccess p{color:var(--muted);font-size:.9rem;max-width:360px}
+.ps-title{color:var(--green);display:block;font-weight:700;margin-top:4px}
+.btn-ps-close{background:var(--gb);color:#fff;padding:13px 32px;
+  border-radius:var(--rmd);font-family:var(--fd);font-size:.95rem;font-weight:700;
+  box-shadow:0 0 28px rgba(123,97,255,.45);transition:var(--tr);margin-top:8px}
+.btn-ps-close:hover{transform:translateY(-2px)}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;z-index:900;
+  background:rgba(10,10,26,.97);border:1px solid var(--glow);border-radius:var(--rmd);
+  padding:13px 18px;display:flex;align-items:flex-start;gap:11px;max-width:310px;
+  box-shadow:var(--sh);backdrop-filter:blur(16px);
+  transform:translateY(80px) scale(.95);opacity:0;transition:transform .38s,opacity .38s}
+.toast.show{transform:translateY(0) scale(1);opacity:1}
+.toast.success{border-color:rgba(34,211,165,.4)}
+.toast.error  {border-color:rgba(255,77,109,.4)}
+.toast.warning{border-color:rgba(255,209,102,.4)}
+#t-ico{font-size:18px;flex-shrink:0}
+#t-ttl{display:block;font-family:var(--fd);font-weight:700;font-size:.85rem;margin-bottom:2px}
+#t-msg{font-size:.76rem;color:var(--muted)}
+
+/* Share drawer */
+.share-drawer{position:fixed;bottom:0;left:0;right:0;z-index:600;
+  background:var(--deep);border-top:1px solid var(--border);
+  border-radius:var(--rlg) var(--rlg) 0 0;padding:28px 24px 36px;
+  transform:translateY(100%);transition:transform .38s ease;
+  box-shadow:0 -8px 48px rgba(0,0,0,.5)}
+.share-drawer.open{transform:translateY(0)}
+.share-handle{width:40px;height:4px;border-radius:2px;background:var(--border);
+  margin:0 auto 22px}
+.share-ttl{font-family:var(--fd);font-size:1rem;font-weight:800;margin-bottom:20px;text-align:center}
+.share-opts{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.sh-opt{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:var(--tr)}
+.sh-opt:hover{transform:translateY(-3px)}
+.sh-ico-wrap{width:52px;height:52px;border-radius:var(--rmd);
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+  background:var(--glass);border:1px solid var(--border);transition:var(--tr)}
+.sh-opt:hover .sh-ico-wrap{border-color:var(--glow);background:rgba(123,97,255,.12)}
+.sh-lbl{font-size:.72rem;color:var(--muted)}
+.share-backdrop{position:fixed;inset:0;z-index:599;background:rgba(0,0,0,.5);
+  display:none;backdrop-filter:blur(4px)}
+.share-backdrop.on{display:block}
+.share-link-row{margin-top:20px;display:flex;gap:0;
+  background:var(--glass);border:1px solid var(--border);border-radius:var(--rsm);overflow:hidden}
+.share-link-in{flex:1;background:none;border:none;padding:11px 14px;color:var(--muted);
+  font-size:.78rem;outline:none;font-family:var(--fb)}
+.share-copy-btn{background:var(--gb);color:#fff;padding:11px 18px;
+  font-size:.78rem;font-weight:600;border:none;cursor:pointer;white-space:nowrap;transition:var(--tr)}
+.share-copy-btn:hover{filter:brightness(1.1)}
+
+/* ══ RESPONSIVE ══════════════════════════════════════════════════════ */
+@media(max-width:900px){
+  .product-wrap{grid-template-columns:1fr;gap:32px}
+  .buy-card{position:static;order:-1;border-radius:var(--rlg)}
+  .related-grid{grid-template-columns:repeat(2,1fr)}
+  .prod-features{grid-template-columns:1fr}
+}
+@media(max-width:640px){
+  .product-wrap{padding:20px 14px 60px}
+  .prod-title{font-size:1.7rem}
+  .buy-price{font-size:2.2rem}
+  .related-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .share-opts{grid-template-columns:repeat(4,1fr)}
+  .bc{padding:12px 14px 0}
+  .nav-inner{padding:0 14px}
+  .toast{left:12px;right:12px;bottom:12px;max-width:none}
+}
+@media(max-width:380px){
+  .related-grid{grid-template-columns:1fr}
+  .share-opts{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- PAYMENT LOADER -->
+<div id="payLoader">
+  <div class="spin"></div>
+  <p>Initialisation du paiement…</p>
+</div>
+
+<!-- PAYMENT SUCCESS -->
+<div id="paySuccess">
+  <div class="ps-ring">✓</div>
+  <h2>Paiement réussi !</h2>
+  <p>Vous avez maintenant accès à :<br/><span class="ps-title" id="psTitle"></span></p>
+  <p style="font-size:.82rem">Cliquez sur <strong>Télécharger</strong> pour obtenir votre document.</p>
+  <button class="btn-ps-close" onclick="closePaySuccess()">Télécharger maintenant ↓</button>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span id="t-ico">ℹ️</span>
+  <div><strong id="t-ttl"></strong><span id="t-msg"></span></div>
+</div>
+
+<!-- SHARE BACKDROP -->
+<div class="share-backdrop" id="shareBd" onclick="closeShare()"></div>
+
+<!-- SHARE DRAWER -->
+<div class="share-drawer" id="shareDrawer">
+  <div class="share-handle"></div>
+  <div class="share-ttl">Partager ce document</div>
+  <div class="share-opts">
+    <div class="sh-opt" onclick="shareVia('whatsapp')">
+      <div class="sh-ico-wrap">💬</div>
+      <span class="sh-lbl">WhatsApp</span>
+    </div>
+    <div class="sh-opt" onclick="shareVia('telegram')">
+      <div class="sh-ico-wrap">✈️</div>
+      <span class="sh-lbl">Telegram</span>
+    </div>
+    <div class="sh-opt" onclick="shareVia('twitter')">
+      <div class="sh-ico-wrap">𝕏</div>
+      <span class="sh-lbl">Twitter / X</span>
+    </div>
+    <div class="sh-opt" onclick="shareVia('facebook')">
+      <div class="sh-ico-wrap">f</div>
+      <span class="sh-lbl">Facebook</span>
+    </div>
+    <div class="sh-opt" onclick="shareVia('linkedin')">
+      <div class="sh-ico-wrap">in</div>
+      <span class="sh-lbl">LinkedIn</span>
+    </div>
+    <div class="sh-opt" onclick="shareVia('email')">
+      <div class="sh-ico-wrap">📧</div>
+      <span class="sh-lbl">Email</span>
+    </div>
+    <div class="sh-opt" onclick="shareVia('sms')">
+      <div class="sh-ico-wrap">💬</div>
+      <span class="sh-lbl">SMS</span>
+    </div>
+    <div class="sh-opt" onclick="copyLink()">
+      <div class="sh-ico-wrap">🔗</div>
+      <span class="sh-lbl">Copier</span>
+    </div>
+  </div>
+  <div class="share-link-row" style="margin-top:18px">
+    <input class="share-link-in" id="shareLinkIn" readonly/>
+    <button class="share-copy-btn" onclick="copyLink()">Copier le lien</button>
+  </div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-ico">🌍</div>
+      <span>Afro <span>Digital</span> Market</span>
+    </a>
+    <div class="nav-cta">
+      <a href="shop.html" class="btn-nav-g">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+        Boutique
+      </a>
+      <a href="login.html" class="btn-nav-p" id="navAuthBtn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Connexion
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE LOADER -->
+<div id="pageLoader">
+  <div class="spin"></div>
+  <p style="color:var(--muted);font-size:.875rem">Chargement du produit…</p>
+</div>
+
+<!-- ERROR STATE -->
+<div id="errState">
+  <div class="err-ico">🔍</div>
+  <h2 class="err-ttl">Produit introuvable</h2>
+  <p class="err-msg" id="errMsg">Ce document n'existe pas ou a été retiré du catalogue.</p>
+  <a href="shop.html" class="btn-nav-p" style="margin-top:8px">← Retour à la boutique</a>
+</div>
+
+<!-- PRODUCT CONTENT (rendered by JS) -->
+<div id="productContent">
+  <!-- Hero bg -->
+  <div class="page-hero">
+    <div class="hero-orb orb1"></div>
+    <div class="hero-orb orb2"></div>
+    <div class="hero-grid"></div>
+  </div>
+
+  <!-- Breadcrumb -->
+  <div class="bc">
+    <a href="index.html">Accueil</a>
+    <span class="bc-sep">›</span>
+    <a href="shop.html">Boutique</a>
+    <span class="bc-sep">›</span>
+    <span id="bcTitle" style="color:var(--muted)">…</span>
+  </div>
+
+  <!-- Main product layout -->
+  <div class="product-wrap">
+
+    <!-- LEFT -->
+    <div class="prod-left" id="prodLeft">
+      <!-- Cover image -->
+      <div class="cover-wrap">
+        <img id="coverImg" src="" alt=""/>
+        <div class="cover-overlay"></div>
+        <div class="cover-badges">
+          <span class="cbadge cbadge-prem" id="premBadge" style="display:none">✦ Premium</span>
+          <span class="cbadge cbadge-cat" id="catBadge"></span>
+        </div>
+      </div>
+
+      <!-- Title & meta -->
+      <div class="prod-cat-lbl">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <span id="prodCatLbl"></span>
+      </div>
+      <h1 class="prod-title" id="prodTitle"></h1>
+      <div class="prod-stars" id="prodStars"></div>
+
+      <!-- Features -->
+      <div class="prod-features">
+        <div class="pf"><span class="pf-ico">⚡</span> Accès instantané</div>
+        <div class="pf"><span class="pf-ico">♾️</span> Accès à vie</div>
+        <div class="pf"><span class="pf-ico">🔐</span> Paiement sécurisé</div>
+        <div class="pf"><span class="pf-ico">🔄</span> Mises à jour incluses</div>
+        <div class="pf"><span class="pf-ico">📄</span> PDF téléchargeable</div>
+        <div class="pf"><span class="pf-ico">💬</span> Support réactif</div>
+      </div>
+
+      <!-- Description -->
+      <div class="prod-desc-ttl">À propos de ce document</div>
+      <p class="prod-desc" id="prodDesc"></p>
+
+      <!-- Seller info -->
+      <div class="seller-card" id="sellerCard">
+        <div class="seller-av" id="sellerAv">V</div>
+        <div>
+          <div class="seller-name" id="sellerlastName">Vendeur</div>
+          <div class="seller-lbl">Auteur · Afro Digital Market</div>
+        </div>
+      </div>
+
+      <!-- Related products -->
+      <div id="relatedSection" style="display:none">
+        <div class="related-ttl">Vous pourriez aussi aimer</div>
+        <div class="related-grid" id="relatedGrid"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT — BUY CARD -->
+    <div class="buy-card">
+      <div class="buy-price" id="buyPrice">—</div>
+      <div class="buy-price-label">Paiement unique · Accès permanent</div>
+
+      <!-- Purchased success banner -->
+      <div class="purchased-banner" id="purchasedBanner">
+        ✓ Vous avez déjà acheté ce document
+      </div>
+
+      <!-- CTA button — dynamically swapped -->
+      <button class="btn-buy-main" id="ctaBtn" onclick="handleCTA()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        <span id="ctaBtnLabel">Acheter maintenant</span>
+      </button>
+
+      <!-- Share -->
+      <button class="btn-share" onclick="openShare()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Partager ce document
+      </button>
+
+      <hr class="bc-sep-line"/>
+
+      <!-- Trust items -->
+      <div class="buy-trust">
+        <div class="bt-item"><span class="bt-ico">🔐</span> Paiement sécurisé via FedaPay</div>
+        <div class="bt-item"><span class="bt-ico">⚡</span> Téléchargement immédiat</div>
+        <div class="bt-item"><span class="bt-ico">📱</span> Mobile Money · Carte · Virement</div>
+        <div class="bt-item"><span class="bt-ico">🔄</span> Satisfait ou remboursé sous 7 jours</div>
+      </div>
+
+      <hr class="bc-sep-line"/>
+
+      <!-- Metadata -->
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;font-size:.78rem">
+          <span style="color:var(--muted)">Catégorie</span>
+          <span id="bcMetaCat" style="font-weight:600"></span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:.78rem">
+          <span style="color:var(--muted)">Format</span>
+          <span style="font-weight:600">PDF / Document digital</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:.78rem" id="metaDateRow">
+          <span style="color:var(--muted)">Publié le</span>
+          <span id="bcMetaDate" style="font-weight:600"></span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.product-wrap -->
+</div><!-- /#productContent -->
+
+<!-- ══════════════════════════════════════════════════════════════════
+     FIREBASE + PAGE LOGIC
+══════════════════════════════════════════════════════════════════ -->
+<script type="module">
+import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getAuth, onAuthStateChanged, signInAnonymously, signOut
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import {
+  getFirestore, collection, doc, getDoc, getDocs,
+  addDoc, updateDoc, query, where, orderBy, limit, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+/* ── Firebase config ── */
+const fbConfig = {
+  apiKey:            "AIzaSyBRmZlGmKkmXEyk22flRYc5xdQV-MBuOYg",
+  authDomain:        "afro-digital-market.firebaseapp.com",
+  projectId:         "afro-digital-market",
+  storageBucket:     "afro-digital-market.firebasestorage.app",
+  messagingSenderId: "1068049707626",
+  appId:             "1:1068049707626:web:f08db8a0b1f9a3f5a6d013"
+};
+const FEDAPAY_PUBLIC_KEY = "pk_live_y7fqKxfU03QR3wqVRvI0k3GY";
+
+const app  = initializeApp(fbConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+/* ── State ── */
+let currentUser  = null;
+let product      = null;   // current product object {id, ...data}
+let hasBought    = false;
+
+/* ── Slug helper ── */
+function toSlug(str) {
+  return String(str || "")
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim().replace(/\s+/g, "-").replace(/-+/g, "-")
+    .slice(0, 80);
+}
+function esc(s) {
+  const d = document.createElement("div");
+  d.appendChild(document.createTextNode(String(s || "")));
+  return d.innerHTML;
+}
+function buildStars(r) {
+  return Array.from({length:5},(_,i)=> {
+    const cls = i < Math.floor(r) ? "f" : i - 0.5 < r ? "h" : "e";
+    return `<svg class="star-svg ${cls}" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+  }).join("");
+}
+
+/* ════════════════════════════
+   AUTH STATE
+════════════════════════════ */
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    currentUser = user;
+    // Update nav auth button
+    const nb = document.getElementById("navAuthBtn");
+    if (!user.isAnonymous && nb) {
+      nb.textContent = "Mon espace"; nb.href = "dashboard.html";
+    }
+    // Re-check purchase status if product already loaded
+    if (product) await checkPurchaseStatus();
+  } else {
+    try { await signInAnonymously(auth); } catch {}
+  }
+});
+
+/* ════════════════════════════
+   LOAD PRODUCT BY TITLE SLUG
+   URL: produit.html?id=guide-business-plan
+════════════════════════════ */
+async function loadProduct() {
+  const params = new URLSearchParams(window.location.search);
+  const slug   = params.get("id") || "";
+
+  if (!slug) {
+    showError("Aucun identifiant de produit fourni dans l'URL.");
+    return;
+  }
+
+  try {
+    /* Query Firestore: get all products, find the one whose title slug matches */
+    const snap = await getDocs(
+      query(collection(db, "products"), orderBy("createdAt", "desc"))
+    );
+
+    let found = null;
+    snap.forEach(docSnap => {
+      const data = docSnap.data();
+      if (toSlug(data.title) === slug) {
+        found = { id: docSnap.id, ...data };
+      }
+    });
+
+    if (!found) {
+      showError(`Aucun produit correspondant à « ${slug} » n'a été trouvé.`);
+      return;
+    }
+
+    product = found;
+    renderProduct(found);
+    await checkPurchaseStatus();
+    loadRelated(found.category, found.id);
+
+  } catch (err) {
+    console.error(err);
+    showError("Erreur de chargement : " + err.message);
+  }
+}
+
+/* ════════════════════════════
+   RENDER PRODUCT PAGE
+════════════════════════════ */
+function renderProduct(p) {
+  const img   = p.image    || "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&q=80";
+  const price = p.price    ? `${Number(p.price).toLocaleString("fr-FR")} FCFA` : "Gratuit";
+  const r     = parseFloat(p.rating) || 4.5;
+  const seller= p.sellerlastName || "Auteur ADM";
+  const date  = p.createdAt?.seconds
+    ? new Date(p.createdAt.seconds * 1000).toLocaleDateString("fr-FR", {day:"numeric",month:"long",year:"numeric"})
+    : null;
+
+  /* Update <title> and OG meta tags */
+  document.title = `${p.title} — Afro Digital Market`;
+  setMeta("metaDesc", `${p.description?.slice(0,155) || p.title} — Acheter sur Afro Digital Market`);
+  setMeta("ogTitle",  p.title);
+  setMeta("ogDesc",   p.description?.slice(0, 200) || p.title);
+  setMeta("ogImg",    img);
+  setMeta("ogUrl",    window.location.href);
+
+  /* Breadcrumb */
+  document.getElementById("bcTitle").textContent = p.title || "";
+
+  /* Cover */
+  const coverEl = document.getElementById("coverImg");
+  coverEl.src = img; coverEl.alt = p.title || "";
+  if (p.premium !== false) document.getElementById("premBadge").style.display = "";
+  document.getElementById("catBadge").textContent = p.category || "Digital";
+
+  /* Title & meta */
+  document.getElementById("prodCatLbl").textContent = p.category || "Document Digital";
+  document.getElementById("prodTitle").textContent  = p.title || "Sans titre";
+  document.getElementById("prodDesc").textContent   = p.description || "Aucune description disponible.";
+
+  const starsEl = document.getElementById("prodStars");
+  starsEl.innerHTML = buildStars(r) + `<span>${r.toFixed(1)} / 5.0</span>`;
+
+  /* Buy card */
+  document.getElementById("buyPrice").textContent     = price;
+  document.getElementById("bcMetaCat").textContent    = p.category || "—";
+  if (date) document.getElementById("bcMetaDate").textContent = date;
+  else       document.getElementById("metaDateRow").style.display = "none";
+
+  /* Seller */
+  const ini = seller.charAt(0).toUpperCase();
+  document.getElementById("sellerAv").textContent   = ini;
+  document.getElementById("sellerlastName").textContent = seller;
+
+  /* Share link */
+  document.getElementById("shareLinkIn").value = window.location.href;
+
+  /* Show content */
+  document.getElementById("pageLoader").style.display  = "none";
+  document.getElementById("productContent").style.display = "block";
+}
+
+function setMeta(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.setAttribute(el.tagName === "META" ? "content" : "content", value);
+  // For meta tags set via id attribute on the tag
+  const metaEl = document.querySelector(`[id="${id}"]`);
+  if (metaEl) metaEl.setAttribute("content", value);
+}
+
+/* ════════════════════════════
+   CHECK PURCHASE STATUS
+════════════════════════════ */
+async function checkPurchaseStatus() {
+  if (!product || !currentUser || currentUser.isAnonymous) {
+    updateCTA(false);
+    return;
+  }
+  try {
+    const q = query(
+      collection(db, "orders"),
+      where("userId",    "==", currentUser.uid),
+      where("productId", "==", product.id),
+      where("status",    "==", "paid")
+    );
+    const snap = await getDocs(q);
+    hasBought  = !snap.empty;
+    updateCTA(hasBought);
+  } catch {
+    updateCTA(false);
+  }
+}
+
+function updateCTA(purchased) {
+  const btn   = document.getElementById("ctaBtn");
+  const label = document.getElementById("ctaBtnLabel");
+  const banner= document.getElementById("purchasedBanner");
+  if (purchased) {
+    btn.className   = "btn-dl-main";
+    btn.innerHTML   = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span id="ctaBtnLabel">Télécharger maintenant</span>`;
+    banner.classList.add("show");
+  } else {
+    btn.className  = "btn-buy-main";
+    btn.innerHTML  = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg><span id="ctaBtnLabel">Acheter — ${product.price ? Number(product.price).toLocaleString("fr-FR") + " FCFA" : "Gratuit"}</span>`;
+    banner.classList.remove("show");
+  }
+}
+
+/* ════════════════════════════
+   CTA HANDLER (buy or download)
+════════════════════════════ */
+window.handleCTA = async function() {
+  if (!product) return;
+  if (hasBought) {
+    doDownload(product.id, product.fileUrl || "");
+  } else {
+    initPurchase();
+  }
+};
+
+/* ════════════════════════════
+   PURCHASE FLOW — FedaPay
+════════════════════════════ */
+async function initPurchase() {
+  // Redirect anonymous users to login
+  if (!currentUser || currentUser.isAnonymous) {
+    sessionStorage.setItem("adm_pending_product", product.id);
+    sessionStorage.setItem("adm_redirect_after_login", window.location.href);
+    toast("warning", "Connexion requise", "Redirection vers la page de connexion…");
+    setTimeout(() => { window.location.href = "login.html"; }, 1400);
+    return;
+  }
+
+  showPayLoader(true);
+
+  let orderId = null;
+  try {
+    // 1. Create pending order
+    const ref = await addDoc(collection(db, "orders"), {
+      userId:       currentUser.uid,
+      productId:    product.id,
+      productTitle: product.title || "",
+      amount:       Number(product.price) || 0,
+      status:       "pending",
+      transactionId:null,
+      createdAt:    serverTimestamp()
+    });
+    orderId = ref.id;
+
+    // 2. Open FedaPay popup
+    FedaPay.init({
+      public_key:  FEDAPAY_PUBLIC_KEY,
+      transaction: {
+        amount:      Number(product.price) || 100,
+        description: `Achat : ${product.title || "Document"}`,
+      },
+      customer: {
+        email: currentUser.email || `user_${currentUser.uid.slice(0,8)}@afrodigitalmarket.com`,
+      },
+      onComplete: async (resp) => {
+        showPayLoader(false);
+
+        if (resp.reason === FedaPay.DIALOG_DISMISSED) {
+          await updateDoc(doc(db, "orders", orderId), { status: "cancelled" });
+          toast("warning", "Annulé", "Vous avez fermé la fenêtre de paiement.");
+          return;
+        }
+
+        if (resp.reason === FedaPay.CHECKOUT_COMPLETED) {
+          const txId = resp.transaction?.id || `txn_${Date.now()}`;
+          await updateDoc(doc(db, "orders", orderId), {
+            status:        "paid",
+            transactionId: String(txId),
+            paidAt:        serverTimestamp()
+          });
+          hasBought = true;
+          updateCTA(true);
+          showPaySuccess(product.title);
+          toast("success", "Paiement réussi !", "Votre document est maintenant disponible.");
+        } else {
+          await updateDoc(doc(db, "orders", orderId), { status: "failed" });
+          toast("error", "Paiement échoué", "La transaction n'a pas abouti. Réessayez.");
+        }
+      }
+    }).open();
+
+  } catch (err) {
+    showPayLoader(false);
+    console.error(err);
+    toast("error", "Erreur", err.message || "Une erreur est survenue.");
+  }
+}
+
+/* ════════════════════════════
+   DOWNLOAD
+════════════════════════════ */
+function doDownload(productId, fileUrl) {
+  if (!fileUrl || !fileUrl.trim()) {
+    toast("warning", "Fichier indisponible", "Ce document n'a pas encore de fichier joint. Contactez le support.");
+    return;
+  }
+
+  // Inject fl_attachment into Cloudinary URL to force browser download
+  let dlUrl = fileUrl;
+  try {
+    dlUrl = fileUrl.replace(/\/upload\/(?!fl_attachment)/, "/upload/fl_attachment/");
+  } catch { dlUrl = fileUrl; }
+
+  const rawName = decodeURIComponent(fileUrl.split("/").pop().split("?")[0]) || "document.pdf";
+  const a = document.createElement("a");
+  a.href     = dlUrl;
+  a.download = rawName;
+  a.target   = "_blank";
+  a.rel      = "noopener noreferrer";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  toast("success", "Téléchargement lancé !", "Votre document se télécharge.");
+}
+
+/* ════════════════════════════
+   RELATED PRODUCTS
+════════════════════════════ */
+async function loadRelated(category, excludeId) {
+  try {
+    const snap = await getDocs(
+      query(collection(db, "products"), where("category", "==", category), limit(4))
+    );
+    const related = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter(p => p.id !== excludeId)
+      .slice(0, 3);
+
+    if (!related.length) return;
+
+    const grid = document.getElementById("relatedGrid");
+    const sec  = document.getElementById("relatedSection");
+    grid.innerHTML = related.map(p => {
+      const img   = p.image || "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&q=80";
+      const price = p.price ? `${Number(p.price).toLocaleString("fr-FR")} FCFA` : "Gratuit";
+      const slug  = toSlug(p.title || p.id);
+      return `
+      <a href="produit.html?id=${slug}" class="rc">
+        <div class="rc-img"><img src="${esc(img)}" alt="${esc(p.title||'')}" loading="lazy"
+          onerror="this.src='https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&q=80'"/></div>
+        <div class="rc-body">
+          <div class="rc-ttl">${esc(p.title || 'Sans titre')}</div>
+          <div class="rc-price">${price}</div>
+        </div>
+      </a>`;
+    }).join("");
+    sec.style.display = "block";
+  } catch {}
+}
+
+/* ════════════════════════════
+   UI HELPERS
+════════════════════════════ */
+function showPayLoader(on) {
+  document.getElementById("payLoader").classList.toggle("on", on);
+}
+function showPaySuccess(title) {
+  document.getElementById("psTitle").textContent = title || "Document";
+  document.getElementById("paySuccess").classList.add("on");
+}
+window.closePaySuccess = function() {
+  document.getElementById("paySuccess").classList.remove("on");
+  if (hasBought) doDownload(product?.id, product?.fileUrl || "");
+};
+
+function showError(msg) {
+  document.getElementById("pageLoader").style.display = "none";
+  document.getElementById("errMsg").textContent = msg;
+  document.getElementById("errState").style.display = "flex";
+}
+
+let toastTimer;
+window.toast = window.showToast = function(type, title, msg) {
+  const t   = document.getElementById("toast");
+  const ico = { success:"✅", error:"❌", warning:"⚠️", info:"ℹ️" };
+  document.getElementById("t-ico").textContent = ico[type] || "ℹ️";
+  document.getElementById("t-ttl").textContent = title;
+  document.getElementById("t-msg").textContent = msg;
+  t.className = `toast ${type} show`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 4500);
+};
+
+/* ════════════════════════════
+   SHARE
+════════════════════════════ */
+window.openShare = function() {
+  // Try native Web Share API first (mobile)
+  if (navigator.share && product) {
+    navigator.share({
+      title: product.title,
+      text:  `Découvrez "${product.title}" sur Afro Digital Market`,
+      url:   window.location.href
+    }).catch(() => {});
+    return;
+  }
+  document.getElementById("shareDrawer").classList.add("open");
+  document.getElementById("shareBd").classList.add("on");
+  document.body.style.overflow = "hidden";
+};
+
+window.closeShare = function() {
+  document.getElementById("shareDrawer").classList.remove("open");
+  document.getElementById("shareBd").classList.remove("on");
+  document.body.style.overflow = "";
+};
+
+window.shareVia = function(platform) {
+  const url   = encodeURIComponent(window.location.href);
+  const title = encodeURIComponent(product?.title || "Document premium");
+  const text  = encodeURIComponent(`Découvrez "${product?.title}" sur Afro Digital Market : ${window.location.href}`);
+  const links = {
+    whatsapp: `https://wa.me/?text=${text}`,
+    telegram: `https://t.me/share/url?url=${url}&text=${title}`,
+    twitter:  `https://twitter.com/intent/tweet?url=${url}&text=${title}`,
+    facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
+    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${url}`,
+    email:    `mailto:?subject=${title}&body=${text}`,
+    sms:      `sms:?body=${text}`
+  };
+  if (links[platform]) window.open(links[platform], "_blank", "noopener,noreferrer");
+  closeShare();
+};
+
+window.copyLink = function() {
+  const url = window.location.href;
+  navigator.clipboard?.writeText(url)
+    .then(() => toast("success", "Lien copié !", "L'URL a été copiée dans le presse-papiers."))
+    .catch(() => {
+      // fallback
+      const inp = document.getElementById("shareLinkIn");
+      if (inp) { inp.select(); document.execCommand("copy"); }
+      toast("success", "Lien copié !", "");
+    });
+  closeShare();
+};
+
+/* ════════════════════════════
+   BOOT
+════════════════════════════ */
+document.addEventListener("DOMContentLoaded", loadProduct);
+</script>
+
+</body>
+</html>
