@@ -8,6 +8,11 @@
     <meta name="description" content="La marketplace africaine de référence pour acheter et vendre des documents digitaux premium : ebooks, guides PDF, formations numériques."/>
     <meta name="theme-color" content="#7b61ff"/>
 
+    <!-- ═══════════════════════════════════════
+         GOOGLE ADSENSE — Remplacez ca-pub-XXXXXXXXXXXXXXXX par votre Publisher ID
+         ═══════════════════════════════════════ -->
+    <!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
+
     <link rel="icon" type="image/png" href="https://afrodigitalmarket.vercel.app/favicon.png" />
     <link rel="shortcut icon" href="https://afrodigitalmarket.vercel.app/favicon.png" type="image/x-index" />
 
@@ -635,6 +640,268 @@ footer{background:var(--deep);border-top:1px solid var(--border);padding:72px 0 
   .stats-inner{grid-template-columns:1fr}
   .hero-title{font-size:2rem}
 }
+
+/* ══════════════════════════════════════════
+   ADM — SYSTÈME PUBLICITAIRE
+   Tous les espaces sont contrôlables via
+   window.ADM_CONFIG (voir script en bas)
+══════════════════════════════════════════ */
+
+/* ── Label commun "Publicité" ── */
+.adm-label{
+  display:block;text-align:center;font-size:.6rem;font-weight:600;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--dim);
+  margin-bottom:5px;
+}
+
+/* ══ 1. BANNIÈRE HEADER PREMIUM ══ */
+.adm-header-wrap{
+  width:100%;padding:14px 0 10px;
+  background:linear-gradient(180deg,rgba(7,7,26,.0) 0%,rgba(7,7,26,.55) 100%);
+  border-bottom:1px solid var(--border);
+  position:relative;overflow:hidden;
+}
+.adm-header-wrap::before{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(123,97,255,.06),transparent);
+  animation:adm-sweep 4s ease-in-out infinite;pointer-events:none;
+}
+@keyframes adm-sweep{0%,100%{opacity:0;transform:translateX(-100%)}50%{opacity:1;transform:translateX(100%)}}
+.adm-header-inner{
+  max-width:970px;margin:0 auto;
+  min-height:90px;border-radius:var(--rmd);
+  background:var(--glass);border:1px solid rgba(123,97,255,.14);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+  box-shadow:0 0 32px rgba(123,97,255,.08);
+}
+/* Emplacement AdSense — décommenter et adapter */
+.adm-adsense-slot{
+  display:block;width:100%;text-align:center;
+}
+/* Bannière de démo (à remplacer par ins.adsbygoogle) */
+.adm-demo-banner{
+  width:100%;padding:18px;text-align:center;
+  font-family:var(--fd);font-size:.8rem;color:var(--muted);
+  display:flex;align-items:center;justify-content:center;gap:10px;
+}
+.adm-demo-banner .adm-demo-size{
+  font-size:.68rem;color:var(--dim);background:rgba(255,255,255,.04);
+  border:1px dashed var(--border);padding:3px 10px;border-radius:99px;
+}
+
+/* ══ 2. SIDEBAR STICKY ══ */
+.adm-layout-wrap{
+  display:grid;grid-template-columns:1fr 280px;gap:32px;align-items:start;
+}
+.adm-main-col{min-width:0}
+.adm-sidebar{
+  position:sticky;top:90px;display:flex;flex-direction:column;gap:18px;
+}
+.adm-sidebar-slot{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--rlg);overflow:hidden;padding:16px;
+  text-align:center;
+}
+.adm-sidebar-slot .adm-demo-banner{flex-direction:column;gap:6px;padding:10px 0}
+
+/* ══ 3. BANNIÈRE INTER-SECTIONS ══ */
+.adm-between{
+  width:100%;padding:22px 0;
+}
+.adm-between-inner{
+  max-width:970px;margin:0 auto;
+  min-height:100px;border-radius:var(--rlg);
+  background:var(--glass);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+  transition:border-color var(--tr);
+}
+.adm-between-inner:hover{border-color:rgba(123,97,255,.22)}
+
+/* ══ 4. PUBLICITÉ DANS L'ARTICLE / GRILLE PRODUITS ══ */
+.adm-in-content{
+  grid-column:1/-1;
+  margin:8px 0;
+  min-height:90px;
+  background:var(--glass);border:1px solid var(--border);
+  border-radius:var(--rmd);
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* ══ 5. BANNIÈRE FOOTER ══ */
+.adm-footer-banner{
+  padding:28px 0;border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  margin-bottom:0;
+}
+.adm-footer-banner-inner{
+  max-width:970px;margin:0 auto;
+  min-height:90px;border-radius:var(--rlg);
+  background:linear-gradient(135deg,rgba(123,97,255,.06),rgba(0,212,255,.04));
+  border:1px solid rgba(123,97,255,.16);
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* ══ 6. BANNIÈRE MOBILE FLOTTANTE ══ */
+.adm-float-mob{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;z-index:8500;
+  background:rgba(7,7,26,.96);
+  border-top:1px solid rgba(123,97,255,.28);
+  backdrop-filter:blur(20px);
+  padding:10px 16px 10px;
+  box-shadow:0 -4px 32px rgba(0,0,0,.5);
+  transform:translateY(0);transition:transform .4s ease;
+}
+.adm-float-mob.hidden{transform:translateY(110%)}
+.adm-float-mob-inner{
+  display:flex;align-items:center;gap:10px;max-width:600px;margin:0 auto;
+}
+.adm-float-mob-ad{flex:1;min-height:50px;display:flex;align-items:center;justify-content:center}
+.adm-float-close{
+  flex-shrink:0;width:28px;height:28px;
+  background:rgba(255,255,255,.08);border:1px solid var(--border);
+  border-radius:50%;color:var(--muted);font-size:14px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:var(--tr);
+}
+.adm-float-close:hover{background:rgba(255,77,109,.18);border-color:var(--red);color:var(--white)}
+@media(max-width:768px){
+  .adm-float-mob{display:block}
+}
+
+/* ══ 7. SECTION PARTENAIRES / SPONSORS ══ */
+.adm-sponsors-sec{padding:64px 0;background:var(--deep)}
+.adm-sponsors-title{text-align:center;margin-bottom:36px}
+.adm-sponsors-title h2{
+  font-family:var(--fd);font-size:clamp(1.4rem,3vw,2rem);font-weight:800;margin-bottom:8px;
+}
+.adm-sponsors-title p{color:var(--muted);font-size:.9rem}
+.adm-carousel-track-wrap{
+  overflow:hidden;position:relative;
+  mask-image:linear-gradient(to right,transparent,black 12%,black 88%,transparent);
+}
+.adm-carousel-track{
+  display:flex;gap:22px;width:max-content;
+  animation:adm-scroll 28s linear infinite;
+}
+.adm-carousel-track:hover{animation-play-state:paused}
+@keyframes adm-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.adm-sponsor-card{
+  flex-shrink:0;
+  background:var(--glass);border:1px solid var(--border);
+  border-radius:var(--rmd);padding:18px 30px;
+  min-width:160px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:8px;
+  cursor:pointer;text-decoration:none;color:var(--white);
+  transition:border-color var(--tr),background var(--tr),transform var(--tr),box-shadow var(--tr);
+}
+.adm-sponsor-card:hover{
+  border-color:rgba(123,97,255,.4);
+  background:rgba(123,97,255,.08);
+  transform:translateY(-3px);
+  box-shadow:0 8px 30px rgba(123,97,255,.18);
+}
+.adm-sponsor-logo{font-size:2rem;margin-bottom:2px}
+.adm-sponsor-name{font-family:var(--fd);font-size:.78rem;font-weight:700;color:var(--muted);
+  letter-spacing:.06em;text-transform:uppercase}
+.adm-sponsor-tag{font-size:.62rem;color:var(--dim);background:rgba(123,97,255,.08);
+  padding:2px 8px;border-radius:99px;border:1px solid rgba(123,97,255,.14)}
+
+/* ══ 8. PANNEAU ADMIN — GESTION DYNAMIQUE ══ */
+.adm-admin-toggle{
+  position:fixed;bottom:72px;right:16px;z-index:9000;
+  background:var(--gb);color:#fff;border:none;
+  width:44px;height:44px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;cursor:pointer;
+  box-shadow:0 4px 20px rgba(123,97,255,.5);
+  transition:var(--tr);
+}
+.adm-admin-toggle:hover{transform:scale(1.1)}
+.adm-admin-toggle.mobile-offset{bottom:76px}
+
+.adm-admin-panel{
+  position:fixed;right:16px;bottom:130px;z-index:9001;
+  width:340px;max-height:80vh;overflow-y:auto;
+  background:rgba(7,7,26,.97);border:1px solid rgba(123,97,255,.3);
+  border-radius:var(--rlg);padding:22px;
+  box-shadow:0 16px 64px rgba(0,0,0,.7),0 0 0 1px rgba(123,97,255,.1);
+  backdrop-filter:blur(24px);
+  display:none;transform:scale(.95) translateY(10px);opacity:0;
+  transition:transform .3s ease,opacity .3s ease;
+}
+.adm-admin-panel.open{display:block;transform:scale(1) translateY(0);opacity:1}
+.adm-admin-panel h3{font-family:var(--fd);font-size:1rem;font-weight:800;margin-bottom:4px}
+.adm-admin-panel .adm-admin-sub{font-size:.72rem;color:var(--muted);margin-bottom:18px}
+
+.adm-admin-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 0;border-bottom:1px solid var(--border);gap:12px;
+}
+.adm-admin-row:last-child{border-bottom:none}
+.adm-admin-row-info{flex:1}
+.adm-admin-row-info strong{font-size:.8rem;font-family:var(--fd);display:block;margin-bottom:2px}
+.adm-admin-row-info span{font-size:.68rem;color:var(--dim)}
+
+/* Toggle switch */
+.adm-switch{position:relative;width:40px;height:22px;flex-shrink:0}
+.adm-switch input{opacity:0;width:0;height:0;position:absolute}
+.adm-switch-slider{
+  position:absolute;inset:0;background:rgba(255,255,255,.1);
+  border:1px solid var(--border);border-radius:99px;cursor:pointer;
+  transition:var(--tr);
+}
+.adm-switch-slider::before{
+  content:"";position:absolute;left:2px;top:2px;
+  width:16px;height:16px;background:var(--muted);
+  border-radius:50%;transition:var(--tr);
+}
+.adm-switch input:checked + .adm-switch-slider{background:rgba(123,97,255,.3);border-color:var(--v)}
+.adm-switch input:checked + .adm-switch-slider::before{transform:translateX(18px);background:var(--v2)}
+
+/* Tabs */
+.adm-tabs{display:flex;gap:4px;margin-bottom:18px;background:var(--glass);
+  border-radius:var(--rsm);padding:3px}
+.adm-tab{flex:1;background:none;border:none;color:var(--muted);font-size:.72rem;
+  font-family:var(--fd);font-weight:600;padding:6px 4px;border-radius:6px;cursor:pointer;
+  transition:var(--tr)}
+.adm-tab.active{background:rgba(123,97,255,.2);color:var(--white)}
+.adm-tab-pane{display:none}
+.adm-tab-pane.active{display:block}
+
+.adm-input{
+  width:100%;background:var(--glass);border:1px solid var(--border);
+  border-radius:var(--rsm);padding:9px 12px;color:var(--white);
+  font-size:.78rem;font-family:var(--fb);outline:none;
+  transition:border-color .25s;margin-bottom:8px;
+}
+.adm-input:focus{border-color:var(--v)}
+.adm-input::placeholder{color:var(--dim)}
+.adm-btn-sm{
+  background:var(--gb);color:#fff;border:none;border-radius:var(--rsm);
+  padding:8px 14px;font-size:.75rem;font-family:var(--fd);font-weight:700;
+  cursor:pointer;transition:var(--tr);width:100%;
+}
+.adm-btn-sm:hover{filter:brightness(1.12)}
+
+/* Performance mini stats */
+.adm-perf-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.adm-perf-card{background:var(--glass);border:1px solid var(--border);
+  border-radius:var(--rsm);padding:10px;text-align:center}
+.adm-perf-num{font-family:var(--fd);font-size:1.1rem;font-weight:800;color:var(--v2)}
+.adm-perf-lbl{font-size:.62rem;color:var(--dim);margin-top:2px}
+
+/* ── Responsive sidebar → masquée sur mobile ── */
+@media(max-width:1024px){
+  .adm-layout-wrap{grid-template-columns:1fr}
+  .adm-sidebar{display:none}
+}
+@media(max-width:640px){
+  .adm-admin-panel{right:8px;left:8px;width:auto;bottom:90px}
+  .adm-sponsor-card{min-width:130px;padding:14px 18px}
+}
 </style>
 </head>
 <body>
@@ -694,7 +961,33 @@ footer{background:var(--deep);border-top:1px solid var(--border);padding:72px 0 
   </div>
 </header>
 
-<!-- ══════════════ HERO ══════════════ -->
+<!-- ═══════════════════════════════════════════════════════
+     ADM — 1. BANNIÈRE HEADER PREMIUM
+     Emplacement : Sous le menu — format leaderboard 970×90
+     AdSense : Remplacer .adm-demo-banner par ins.adsbygoogle
+     ═══════════════════════════════════════════════════════ -->
+<div class="adm-header-wrap" id="admHeaderBanner" aria-label="Espace publicitaire">
+  <div class="wrap">
+    <span class="adm-label">Publicité</span>
+    <div class="adm-header-inner">
+      <!-- ✅ ADSENSE : décommenter et adapter
+      <ins class="adsbygoogle adm-adsense-slot"
+           style="display:block"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="XXXXXXXXXX"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+      -->
+      <!-- 🎨 BANNIÈRE DEMO — à remplacer par AdSense ou bannière custom -->
+      <div class="adm-demo-banner">
+        <span>🎯 Espace publicitaire Premium</span>
+        <span class="adm-demo-size">970 × 90 — Leaderboard</span>
+        <span class="adm-demo-size">Remplacez par votre code AdSense</span>
+      </div>
+    </div>
+  </div>
+</div>
 <section class="hero" id="accueil">
   <div class="hero-bg">
     <div class="orb orb1"></div>
@@ -802,7 +1095,31 @@ footer{background:var(--deep);border-top:1px solid var(--border);padding:72px 0 
       <div class="trust-divider"></div>
       <div class="trust-item"><span class="trust-ico">🌍</span> 18 000+ acheteurs</div>
       <div class="trust-divider"></div>
-      <div class="trust-item"><span class="trust-ico">💬</span> Support réactif</div>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     ADM — 4A. BANNIÈRE INTER-SECTION (après Trust Bar)
+     Format : Billboard 970×250
+     ═══════════════════════════════════════════════════════ -->
+<div class="adm-between" id="admBetween1" aria-label="Espace publicitaire">
+  <div class="wrap">
+    <span class="adm-label">Publicité</span>
+    <div class="adm-between-inner">
+      <!-- ✅ ADSENSE : décommenter et compléter
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="XXXXXXXXXX"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+      -->
+      <div class="adm-demo-banner">
+        <span>📢 Billboard Publicitaire</span>
+        <span class="adm-demo-size">970 × 250 — Haute visibilité</span>
+      </div>
     </div>
   </div>
 </div>
@@ -904,6 +1221,31 @@ footer{background:var(--deep);border-top:1px solid var(--border);padding:72px 0 
   </div>
 </section>
 
+<!-- ═══════════════════════════════════════════════════════
+     ADM — 4B. BANNIÈRE INTER-SECTION (entre produits et stats)
+     Format : Leaderboard 728×90 ou responsive
+     ═══════════════════════════════════════════════════════ -->
+<div class="adm-between" id="admBetween2" aria-label="Espace publicitaire">
+  <div class="wrap">
+    <span class="adm-label">Publicité</span>
+    <div class="adm-between-inner">
+      <!-- ✅ ADSENSE : décommenter et compléter
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="XXXXXXXXXX"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+      -->
+      <div class="adm-demo-banner">
+        <span>📣 Leaderboard</span>
+        <span class="adm-demo-size">728 × 90 — Entre sections</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ══════════════ STATS BAND ══════════════ -->
 <section class="stats-band">
   <div class="wrap">
@@ -955,9 +1297,32 @@ footer{background:var(--deep);border-top:1px solid var(--border);padding:72px 0 
         <h3 class="step-ttl">Téléchargez instantanément</h3>
         <p class="step-desc">Recevez immédiatement votre lien de téléchargement sécurisé. Accès à vie garanti.</p>
       </div>
-    </div>
   </div>
 </section>
+
+<!-- ═══════════════════════════════════════════════════════
+     ADM — 4C. BANNIÈRE INTER-SECTION (entre processus et avantages)
+     ═══════════════════════════════════════════════════════ -->
+<div class="adm-between" id="admBetween3" aria-label="Espace publicitaire">
+  <div class="wrap">
+    <span class="adm-label">Publicité</span>
+    <div class="adm-between-inner">
+      <!-- ✅ ADSENSE : décommenter
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="XXXXXXXXXX"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+      -->
+      <div class="adm-demo-banner">
+        <span>🎯 Large Rectangle</span>
+        <span class="adm-demo-size">336 × 280 — Haute conversion</span>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ══════════════ ADVANTAGES ══════════════ -->
 <section class="sec">
@@ -1074,7 +1439,122 @@ footer{background:var(--deep);border-top:1px solid var(--border);padding:72px 0 
   </div>
 </section>
 
+<!-- ═══════════════════════════════════════════════════════
+     ADM — 7. SECTION NOS PARTENAIRES / SPONSORS PREMIUM
+     Carrousel automatique avec effets hover modernes
+     ═══════════════════════════════════════════════════════ -->
+<section class="adm-sponsors-sec" id="admSponsors" aria-label="Nos partenaires">
+  <div class="wrap">
+    <div class="adm-sponsors-title reveal">
+      <span class="pill"><div class="gdot"></div> Partenaires</span>
+      <h2>Nos <span class="grad-txt">Partenaires</span> de confiance</h2>
+      <p>Ils font confiance à Afro Digital Market pour toucher notre audience africaine premium.</p>
+    </div>
+    <div class="adm-carousel-track-wrap">
+      <div class="adm-carousel-track" id="sponsorTrack">
+        <!-- Sponsors réels — dupliqués pour boucle infinie -->
+        <a href="#" class="adm-sponsor-card" aria-label="Sponsor FedaPay">
+          <div class="adm-sponsor-logo">💳</div>
+          <div class="adm-sponsor-name">FedaPay</div>
+          <span class="adm-sponsor-tag">Paiement</span>
+        </a>
+        <a href="#" class="adm-sponsor-card" aria-label="Sponsor MTN MoMo">
+          <div class="adm-sponsor-logo">📱</div>
+          <div class="adm-sponsor-name">MTN MoMo</div>
+          <span class="adm-sponsor-tag">Mobile Money</span>
+        </a>
+        <a href="#" class="adm-sponsor-card" aria-label="Sponsor Orange Money">
+          <div class="adm-sponsor-logo">🟠</div>
+          <div class="adm-sponsor-name">Orange Money</div>
+          <span class="adm-sponsor-tag">Fintech</span>
+        </a>
+        <a href="#" class="adm-sponsor-card" aria-label="Sponsor Votre Logo">
+          <div class="adm-sponsor-logo">⭐</div>
+          <div class="adm-sponsor-name">Votre Logo</div>
+          <span class="adm-sponsor-tag">Sponsor</span>
+        </a>
+        <a href="#" class="adm-sponsor-card" aria-label="Sponsor Wave">
+          <div class="adm-sponsor-logo">🌊</div>
+          <div class="adm-sponsor-name">Wave</div>
+          <span class="adm-sponsor-tag">Paiement</span>
+        </a>
+        <a href="#" class="adm-sponsor-card" aria-label="Sponsor Airtel Money">
+          <div class="adm-sponsor-logo">🔴</div>
+          <div class="adm-sponsor-name">Airtel Money</div>
+          <span class="adm-sponsor-tag">Mobile Money</span>
+        </a>
+        <a href="#" class="adm-sponsor-card" aria-label="Sponsor Partenaire">
+          <div class="adm-sponsor-logo">🚀</div>
+          <div class="adm-sponsor-name">Partenaire</div>
+          <span class="adm-sponsor-tag">Contactez-nous</span>
+        </a>
+        <!-- Duplication pour boucle infinie -->
+        <a href="#" class="adm-sponsor-card" aria-label="Sponsor FedaPay">
+          <div class="adm-sponsor-logo">💳</div>
+          <div class="adm-sponsor-name">FedaPay</div>
+          <span class="adm-sponsor-tag">Paiement</span>
+        </a>
+        <a href="#" class="adm-sponsor-card" aria-label="Sponsor MTN MoMo">
+          <div class="adm-sponsor-logo">📱</div>
+          <div class="adm-sponsor-name">MTN MoMo</div>
+          <span class="adm-sponsor-tag">Mobile Money</span>
+        </a>
+        <a href="#" class="adm-sponsor-card" aria-label="Sponsor Orange Money">
+          <div class="adm-sponsor-logo">🟠</div>
+          <div class="adm-sponsor-name">Orange Money</div>
+          <span class="adm-sponsor-tag">Fintech</span>
+        </a>
+        <a href="#" class="adm-sponsor-card" aria-label="Sponsor Votre Logo">
+          <div class="adm-sponsor-logo">⭐</div>
+          <div class="adm-sponsor-name">Votre Logo</div>
+          <span class="adm-sponsor-tag">Sponsor</span>
+        </a>
+        <a href="#" class="adm-sponsor-card" aria-label="Sponsor Wave">
+          <div class="adm-sponsor-logo">🌊</div>
+          <div class="adm-sponsor-name">Wave</div>
+          <span class="adm-sponsor-tag">Paiement</span>
+        </a>
+        <a href="#" class="adm-sponsor-card" aria-label="Sponsor Airtel Money">
+          <div class="adm-sponsor-logo">🔴</div>
+          <div class="adm-sponsor-name">Airtel Money</div>
+          <span class="adm-sponsor-tag">Mobile Money</span>
+        </a>
+        <a href="#" class="adm-sponsor-card" aria-label="Sponsor Partenaire">
+          <div class="adm-sponsor-logo">🚀</div>
+          <div class="adm-sponsor-name">Partenaire</div>
+          <span class="adm-sponsor-tag">Contactez-nous</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ══════════════ FOOTER ══════════════ -->
+<!-- ═══════════════════════════════════════════════════════
+     ADM — 5. BANNIÈRE FOOTER PREMIUM
+     Format : Leaderboard 970×90 intégré au thème
+     ═══════════════════════════════════════════════════════ -->
+<div class="adm-footer-banner" id="admFooterBanner" aria-label="Espace publicitaire">
+  <div class="wrap">
+    <span class="adm-label">Publicité</span>
+    <div class="adm-footer-banner-inner">
+      <!-- ✅ ADSENSE : décommenter
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="XXXXXXXXXX"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+      -->
+      <div class="adm-demo-banner">
+        <span>🏆 Bannière Footer Premium</span>
+        <span class="adm-demo-size">970 × 90 — Forte mémorisation</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <footer>
   <div class="wrap">
     <div class="foot-grid">
@@ -1122,7 +1602,7 @@ footer{background:var(--deep);border-top:1px solid var(--border);padding:72px 0 
       </div>
     </div>
     <div class="foot-bottom">
-      <p>© 2025 Afro Digital Market. Tous droits réservés.</p>
+      <p>© 2026 Afro Digital Market. Tous droits réservés.</p>
       <div class="foot-links">
         <a href="#">Mentions légales</a>
         <a href="#">Confidentialité</a>
